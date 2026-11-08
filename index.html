@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TalkBinder — Safety Paperwork Binder (Demo)</title>
+<style>
+  :root{
+    --ink:#23272e; --ink2:#39404a; --mut:#5d6774; --line:#d9dce1;
+    --bg:#f2f1ec; --card:#ffffff; --accent:#5a6e57; --accent2:#33526e;
+    --brass:#8a6d2f; --red:#9c3226; --redbg:#fbf0ee; --amber:#7c5800; --amberbg:#faf3dd;
+    --green:#33603c; --greenbg:#edf4ee; --greybg:#eef0ee;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); font-size:14px;}
+  header{background:#262b31; color:#fff; padding:14px 28px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
+  header .logo{font-family:Georgia,"Times New Roman",serif; font-size:21px; font-weight:700; letter-spacing:.3px;}
+  header .logo span{color:#c9a959;}
+  header .sub{color:#c3cad2; font-size:12.5px;}
+  header .demo-badge{margin-left:auto; background:#c9a959; color:#241c04; font-weight:700; font-size:12px; padding:5px 12px; border-radius:20px; text-transform:uppercase; letter-spacing:.6px;}
+  .companybar{background:#39404a; color:#dde2e8; padding:8px 28px; font-size:13px; display:flex; gap:24px; flex-wrap:wrap;}
+  .companybar b{color:#fff;}
+  nav{display:flex; gap:4px; background:#fff; border-bottom:1px solid var(--line); padding:0 20px; position:sticky; top:0; z-index:5; flex-wrap:wrap;}
+  nav button{background:none; border:none; border-bottom:3px solid transparent; padding:13px 13px; font-size:14px; font-weight:600; color:var(--mut); cursor:pointer; min-height:48px;}
+  nav button:hover{color:var(--ink);}
+  nav button.active{color:var(--ink); border-bottom-color:var(--brass);}
+  main{max-width:1180px; margin:0 auto; padding:24px 20px 40px;}
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+  h2{font-family:Georgia,"Times New Roman",serif; font-size:19px; margin-bottom:4px; color:var(--ink);}
+  h3{font-size:15px; color:var(--ink2); margin:18px 0 8px;}
+  .pdesc{color:var(--mut); margin-bottom:18px; font-size:13px; max-width:78ch;}
+  .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:16px; margin-bottom:22px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px;}
+  .card .lbl{font-size:12px; text-transform:uppercase; letter-spacing:.7px; color:var(--mut); font-weight:700;}
+  .card .big{font-size:28px; font-weight:800; margin:6px 0 2px; color:var(--ink);}
+  .card .note{font-size:12.5px; color:var(--mut);}
+  .card.risk .big{color:var(--red);}
+  .card.warn .big{color:var(--amber);}
+  .card.good .big{color:var(--green);}
+  .riskbanner{background:var(--redbg); border:1px solid #ecc9c3; color:#6d231a; border-radius:10px; padding:14px 18px; margin-bottom:22px; font-size:13.5px;}
+  .riskbanner b{color:var(--red);}
+  .okbanner{background:var(--greenbg); border:1px solid #c4d8c6; color:#274d2e; border-radius:10px; padding:12px 18px; margin-bottom:18px; font-size:13.5px;}
+  .notebox{background:var(--greybg); border:1px solid var(--line); border-radius:10px; padding:14px 18px; margin-bottom:18px; font-size:13px; color:var(--ink2);}
+  .notebox b{color:var(--ink);}
+  .tblwrap{overflow-x:auto; background:var(--card); border:1px solid var(--line); border-radius:10px; margin-bottom:22px;}
+  table.tbl{border-collapse:collapse; width:100%; min-width:640px;}
+  table.tbl th, table.tbl td{padding:10px 12px; text-align:left; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:top;}
+  table.tbl th{background:var(--greybg); font-size:12px; text-transform:uppercase; letter-spacing:.5px; color:var(--mut);}
+  table.tbl tr:last-child td{border-bottom:none;}
+  .pill{display:inline-block; padding:2px 10px; border-radius:20px; font-size:12px; font-weight:700;}
+  .pill.ok{background:var(--greenbg); color:var(--green);}
+  .pill.warn{background:var(--amberbg); color:var(--amber);}
+  .pill.bad{background:var(--redbg); color:var(--red);}
+  .pill.grey{background:var(--greybg); color:var(--mut);}
+  .btn{display:inline-block; background:var(--accent2); color:#fff; border:none; border-radius:8px; padding:10px 18px; font-size:14px; font-weight:600; cursor:pointer; min-height:48px; text-decoration:none;}
+  .btn:hover{background:#284259;}
+  .btn.primary{background:var(--accent);}
+  .btn.primary:hover{background:#495c47;}
+  .btn.plain{background:#fff; color:var(--ink2); border:1px solid var(--line);}
+  .btn.plain:hover{background:var(--greybg);}
+  .btn.small{min-height:44px; padding:7px 13px; font-size:13px;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .formbox{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:22px;}
+  .fgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px 18px;}
+  .fld label{display:block; font-size:12.5px; font-weight:700; color:var(--ink2); margin-bottom:5px;}
+  .fld .req{color:var(--red);}
+  .inwrap{display:flex; gap:6px; align-items:stretch;}
+  .inwrap input, .inwrap textarea, .inwrap select{flex:1 1 auto; min-width:0;}
+  input[type=text], input[type=number], input[type=date], input[type=email], select, textarea{width:100%; border:1px solid var(--line); border-radius:8px; padding:10px 11px; font-size:14px; font-family:inherit; background:#fff; color:var(--ink); min-height:48px;}
+  textarea{min-height:74px; resize:vertical;}
+  .mic{flex:0 0 auto; width:48px; min-height:48px; border:1px solid var(--line); background:#fff; border-radius:8px; font-size:19px; cursor:pointer;}
+  .mic:hover{background:var(--greybg);}
+  .mic.listening{background:var(--amberbg); border-color:var(--amber);}
+  .checks{display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:6px 14px; margin-top:6px;}
+  .checks label{display:flex; gap:8px; align-items:center; font-size:13.5px; font-weight:400; color:var(--ink); padding:6px 4px; cursor:pointer;}
+  .checks input{width:20px; height:20px; flex:0 0 auto;}
+  .topiclib{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+  .topiclib button{background:#fff; border:1px solid var(--line); border-radius:20px; padding:9px 14px; font-size:13px; font-weight:600; color:var(--ink2); cursor:pointer; min-height:44px;}
+  .topiclib button:hover{border-color:var(--brass); color:var(--ink);}
+  .topiclib button.sel{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .bar{height:10px; background:var(--greybg); border-radius:6px; overflow:hidden; min-width:110px;}
+  .bar i{display:block; height:100%; background:var(--accent);}
+  .bar i.mid{background:var(--brass);}
+  .bar i.low{background:var(--red);}
+  .walletgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; margin-bottom:22px;}
+  .wallet{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .wallet h4{font-size:14.5px; margin-bottom:2px;}
+  .wallet .role{color:var(--mut); font-size:12.5px; margin-bottom:8px;}
+  .wallet .certline{font-size:13px; padding:5px 0; border-top:1px solid var(--greybg); display:flex; justify-content:space-between; gap:10px;}
+  details.helpitem{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 18px; margin-bottom:10px;}
+  details.helpitem summary{font-weight:700; cursor:pointer; font-size:14.5px; padding:4px 0;}
+  details.helpitem p{color:var(--ink2); font-size:13.5px; margin:8px 0 4px; max-width:78ch;}
+  footer{border-top:1px solid var(--line); padding:18px 28px; color:var(--mut); font-size:12.5px; max-width:1180px; margin:0 auto;}
+  #toast{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); background:#262b31; color:#fff; padding:12px 20px; border-radius:10px; font-size:14px; display:none; z-index:60; max-width:92vw; text-align:center;}
+  .modalwrap{position:fixed; inset:0; background:rgba(20,22,26,.55); display:none; z-index:50; overflow:auto; padding:22px 12px;}
+  .modal{background:#fff; border-radius:12px; max-width:640px; margin:0 auto; padding:22px 24px;}
+  .modal h3{margin-top:0;}
+  .sigrow{border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:10px;}
+  .sigrow .who{font-weight:700; font-size:13.5px; margin-bottom:6px; display:flex; justify-content:space-between; align-items:center;}
+  .sigrow canvas{width:100%; height:64px; border:1px dashed var(--line); border-radius:8px; background:#fdfdfa; touch-action:none;}
+  .sigrow .signednote{color:var(--green); font-size:12.5px; font-weight:700;}
+  #printArea{display:none;}
+  @media print{
+    header, .companybar, nav, main, footer, #toast, .modalwrap{display:none !important;}
+    #printArea{display:block !important; color:#000; font-size:12.5px;}
+    #printArea h1{font-size:20px; margin-bottom:4px;}
+    #printArea h2{font-size:15px; margin:20px 0 6px; border-bottom:2px solid #000; padding-bottom:3px;}
+    #printArea table{border-collapse:collapse; width:100%; margin-bottom:10px;}
+    #printArea th, #printArea td{border:1px solid #999; padding:5px 7px; text-align:left; font-size:12px; vertical-align:top;}
+    #printArea .sigimg{height:34px;}
+    #printArea .pb-note{font-size:11.5px; color:#333;}
+  }
+  @media (max-width:640px){
+    header{padding:12px 16px;} .companybar{padding:8px 16px;} main{padding:18px 12px 32px;}
+    nav{padding:0 8px;} nav button{padding:12px 8px; font-size:13px;}
+  }
+  /* Rendered-output classes (dashboard stats, bars, badges, sign rows, binder checks) */
+  .stat{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:2px;}
+  .stat .k{font-size:.78rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);}
+  .stat .v{font-size:1.9rem; font-weight:800; line-height:1.15; color:var(--ink);}
+  .stat .sub{font-size:.85rem; color:var(--muted);}
+  .bar{background:#e7ebef; border-radius:6px; height:10px; overflow:hidden; min-width:90px;}
+  .bar span{display:block; height:100%; border-radius:6px;}
+  .bar span.done{background:#1e7d46;} .bar span.prog{background:#b97d10;} .bar span.low{background:#b3352c;}
+  .pctlabel{font-weight:700; font-size:.9rem; margin-left:8px;}
+  .badge{display:inline-block; padding:2px 9px; border-radius:999px; font-size:.78rem; font-weight:700; white-space:nowrap;}
+  .badge.ok{background:#e2f2e7; color:#145c31; border:1px solid #9fd3ae;}
+  .badge.soon{background:#fdf0d5; color:#7a5200; border:1px solid #ecc97e;}
+  .badge.bad{background:#fbe3e0; color:#8c231b; border:1px solid #eba79f;}
+  .checkrow{display:flex; justify-content:space-between; gap:12px; padding:9px 2px; border-bottom:1px solid var(--line); font-size:.95rem;}
+  .sighead{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+  .sigstatus{font-weight:700; font-size:.88rem; color:var(--muted);}
+  .sigpad{width:100%; max-width:520px; height:110px; background:#fff; border:1.5px dashed #9aa5b1; border-radius:8px; touch-action:none; margin-top:8px;}
+  td.num, th.num{text-align:right;}
+  #printArea .pdoc h1{font-size:20px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Talk<span>Binder</span></div>
+  <div class="sub">The audit-ready safety paperwork binder for small contractors — talks, JSAs, inspections, certs, and the OSHA 300 log in one place.</div>
+  <div class="demo-badge">Demo</div>
+</header>
+<div class="companybar">
+  <span><b id="cbCompany">Ozark Mechanical Contractors</b></span>
+  <span id="cbAudit">GC audit: — </span>
+  <span>Demo data — every company, person, and record in this demo is fictional.</span>
+</div>
+<nav id="mainNav">
+  <button type="button" data-view="dash" class="active">Binder</button>
+  <button type="button" data-view="talks">Toolbox Talks</button>
+  <button type="button" data-view="jsas">JSAs</button>
+  <button type="button" data-view="insp">Inspections</button>
+  <button type="button" data-view="train">Training &amp; Certs</button>
+  <button type="button" data-view="osha">OSHA 300</button>
+  <button type="button" data-view="workers">Workers</button>
+  <button type="button" data-view="binder">Produce Binder</button>
+  <button type="button" data-view="help">Help</button>
+</nav>
+<main>
+<div id="recoverBanner" class="riskbanner" style="display:none"></div>
+
+<section class="panel active" id="panel-dash">
+  <h2>Binder dashboard</h2>
+  <p class="pdesc">One binder, organized the way a GC safety audit asks for it. Completeness is figured from the records themselves — nothing here is typed in twice.</p>
+  <div id="dashBanner"></div>
+  <div class="cards" id="dashCards"></div>
+  <h3>Completeness by audit category</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Category</th><th>What the auditor asks for</th><th>On file</th><th style="min-width:150px">Complete</th></tr></thead>
+    <tbody id="dashCatBody"></tbody>
+  </table></div>
+  <h3>Chase list — who is missing what</h3>
+  <p class="pdesc">Built from the same records: expired or missing certifications, audit-required talk topics with no talk on file, and talk sign-offs still unsigned.</p>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+    <tbody id="dashChaseBody"></tbody>
+  </table></div>
+</section>
+
+<section class="panel" id="panel-talks">
+  <h2>Toolbox talks</h2>
+  <p class="pdesc">Pick a topic from the library, fill in the talk, and save — the crew signs on this same device, one name at a time. No per-worker accounts, no logins for the crew.</p>
+  <h3>Topic library</h3>
+  <div class="topiclib" id="topicLib"></div>
+  <div class="formbox">
+    <h3 style="margin-top:0">Record a talk</h3>
+    <div class="fgrid">
+      <div class="fld"><label for="t_topic">Topic <span class="req">*</span></label><div class="inwrap"><input type="text" id="t_topic" placeholder="Pick from the library or type your own"><button type="button" class="mic" data-for="t_topic" aria-label="Dictate topic">🎤</button></div></div>
+      <div class="fld"><label for="t_date">Date <span class="req">*</span></label><input type="date" id="t_date"></div>
+      <div class="fld"><label for="t_project">Project</label><div class="inwrap"><input type="text" id="t_project"><button type="button" class="mic" data-for="t_project" aria-label="Dictate project">🎤</button></div></div>
+      <div class="fld"><label for="t_location">Location on site</label><div class="inwrap"><input type="text" id="t_location"><button type="button" class="mic" data-for="t_location" aria-label="Dictate location">🎤</button></div></div>
+      <div class="fld"><label for="t_ledBy">Led by</label><div class="inwrap"><input type="text" id="t_ledBy"><button type="button" class="mic" data-for="t_ledBy" aria-label="Dictate led by">🎤</button></div></div>
+    </div>
+    <div class="fld" style="margin-top:14px"><label for="t_notes">What was covered</label><div class="inwrap"><textarea id="t_notes" placeholder="The points covered, questions raised, and anything to follow up."></textarea><button type="button" class="mic" data-for="t_notes" aria-label="Dictate what was covered">🎤</button></div></div>
+    <div class="fld" style="margin-top:14px"><label>Who attended</label><div class="checks" id="t_attendees"></div></div>
+    <div style="margin-top:16px"><button type="button" class="btn primary" id="t_save">Save talk &amp; collect sign-offs</button></div>
+  </div>
+  <h3>Talks on file</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Date</th><th>Topic</th><th>Project</th><th>Led by</th><th>Attended</th><th>Signed</th><th></th></tr></thead>
+    <tbody id="talkBody"></tbody>
+  </table></div>
+</section>
+
+<section class="panel" id="panel-jsas">
+  <h2>Job safety analyses</h2>
+  <p class="pdesc">One JSA per high-risk task: the steps, the hazards, and the controls — written once, signed by the crew doing the work, and filed straight into the binder.</p>
+  <div class="formbox">
+    <h3 style="margin-top:0">Write a JSA</h3>
+    <div class="fgrid">
+      <div class="fld"><label for="j_task">Job / task <span class="req">*</span></label><div class="inwrap"><input type="text" id="j_task" placeholder="e.g. Overhead duct installation — Level 3"><button type="button" class="mic" data-for="j_task" aria-label="Dictate job or task">🎤</button></div></div>
+      <div class="fld"><label for="j_date">Date <span class="req">*</span></label><input type="date" id="j_date"></div>
+      <div class="fld"><label for="j_project">Project</label><div class="inwrap"><input type="text" id="j_project"><button type="button" class="mic" data-for="j_project" aria-label="Dictate project">🎤</button></div></div>
+      <div class="fld"><label for="j_by">Prepared by</label><div class="inwrap"><input type="text" id="j_by"><button type="button" class="mic" data-for="j_by" aria-label="Dictate prepared by">🎤</button></div></div>
+      <div class="fld"><label for="j_ppe">PPE required</label><div class="inwrap"><input type="text" id="j_ppe" placeholder="e.g. Hard hat, eye protection, gloves, harness over 6 ft"><button type="button" class="mic" data-for="j_ppe" aria-label="Dictate PPE required">🎤</button></div></div>
+    </div>
+    <div class="fgrid" style="margin-top:14px">
+      <div class="fld"><label for="j_hazards">Hazards</label><div class="inwrap"><textarea id="j_hazards" placeholder="One hazard per line."></textarea><button type="button" class="mic" data-for="j_hazards" aria-label="Dictate hazards">🎤</button></div></div>
+      <div class="fld"><label for="j_controls">Controls</label><div class="inwrap"><textarea id="j_controls" placeholder="How each hazard is controlled, in the same order."></textarea><button type="button" class="mic" data-for="j_controls" aria-label="Dictate controls">🎤</button></div></div>
+    </div>
+    <div class="fld" style="margin-top:14px"><label>Crew on this task</label><div class="checks" id="j_crew"></div></div>
+    <div style="margin-top:16px"><button type="button" class="btn primary" id="j_save">Save JSA</button></div>
+  </div>
+  <h3>JSAs on file</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Date</th><th>Job / task</th><th>Project</th><th>Prepared by</th><th>Crew</th></tr></thead>
+    <tbody id="jsaBody"></tbody>
+  </table></div>
+</section>
+
+<section class="panel" id="panel-insp">
+  <h2>Equipment inspections</h2>
+  <p class="pdesc">Pre-use inspections on the record, with defects stated plainly. A machine with defects found is flagged in the binder until a later inspection shows it back in service.</p>
+  <div class="formbox">
+    <h3 style="margin-top:0">Record an inspection</h3>
+    <div class="fgrid">
+      <div class="fld"><label for="i_equip">Equipment <span class="req">*</span></label><div class="inwrap"><input type="text" id="i_equip" placeholder="e.g. Telehandler"><button type="button" class="mic" data-for="i_equip" aria-label="Dictate equipment">🎤</button></div></div>
+      <div class="fld"><label for="i_equipId">Equipment ID</label><div class="inwrap"><input type="text" id="i_equipId" placeholder="e.g. TH-2"><button type="button" class="mic" data-for="i_equipId" aria-label="Dictate equipment ID">🎤</button></div></div>
+      <div class="fld"><label for="i_date">Date <span class="req">*</span></label><input type="date" id="i_date"></div>
+      <div class="fld"><label for="i_by">Inspected by</label><div class="inwrap"><input type="text" id="i_by"><button type="button" class="mic" data-for="i_by" aria-label="Dictate inspected by">🎤</button></div></div>
+      <div class="fld"><label for="i_result">Result</label><select id="i_result"><option value="Pass">Pass — in service</option><option value="Defects found">Defects found</option></select></div>
+    </div>
+    <div class="fld" style="margin-top:14px"><label for="i_defects">Defects / notes</label><div class="inwrap"><textarea id="i_defects" placeholder="What was found, and what was done about it."></textarea><button type="button" class="mic" data-for="i_defects" aria-label="Dictate defects or notes">🎤</button></div></div>
+    <div style="margin-top:16px"><button type="button" class="btn primary" id="i_save">Save inspection</button></div>
+  </div>
+  <h3>Inspections on file</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Date</th><th>Equipment</th><th>ID</th><th>Inspected by</th><th>Result</th><th>Defects / notes</th></tr></thead>
+    <tbody id="inspBody"></tbody>
+  </table></div>
+</section>
+
+<section class="panel" id="panel-train">
+  <h2>Training matrix &amp; certifications</h2>
+  <p class="pdesc">Every certification is entered once, on the worker's record. The matrix below is figured from those records — it is never a second spreadsheet somebody has to keep in step.</p>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Certification</th><th>Required for</th><th>Current</th><th>Expiring ≤30 days</th><th>Expired</th><th>Missing</th></tr></thead>
+    <tbody id="matrixBody"></tbody>
+  </table></div>
+  <div class="notebox"><b>How expiry is figured:</b> a certification counts as expired the day after its expiry date, and "expiring" within 30 days of it. Certifications with no expiry date (like the OSHA 10-hour card) count as current. For forklift operators, TalkBinder tracks the <b>operator evaluation</b>: OSHA's powered-industrial-truck rule requires each operator to be evaluated at least once every three years (29 CFR 1910.178(l)(4)(iii)) — the evaluation due date is what belongs in the expiry field. <b>VERIFY:</b> your own company policy and your GC's requirements set which certifications each role must hold and how often they renew — the required-for lists here are your company's settings, not OSHA's.</div>
+  <div class="formbox">
+    <h3 style="margin-top:0">Add a certification</h3>
+    <div class="fgrid">
+      <div class="fld"><label for="c_worker">Worker <span class="req">*</span></label><select id="c_worker"></select></div>
+      <div class="fld"><label for="c_name">Certification <span class="req">*</span></label><div class="inwrap"><input type="text" id="c_name" placeholder="e.g. Forklift Operator Evaluation"><button type="button" class="mic" data-for="c_name" aria-label="Dictate certification">🎤</button></div></div>
+      <div class="fld"><label for="c_issuer">Issued by</label><div class="inwrap"><input type="text" id="c_issuer"><button type="button" class="mic" data-for="c_issuer" aria-label="Dictate issued by">🎤</button></div></div>
+      <div class="fld"><label for="c_number">Certificate / card number</label><div class="inwrap"><input type="text" id="c_number"><button type="button" class="mic" data-for="c_number" aria-label="Dictate certificate number">🎤</button></div></div>
+      <div class="fld"><label for="c_issued">Date issued</label><input type="date" id="c_issued"></div>
+      <div class="fld"><label for="c_expires">Expiry / evaluation due (blank = none)</label><input type="date" id="c_expires"></div>
+    </div>
+    <div style="margin-top:16px"><button type="button" class="btn primary" id="c_save">Save certification</button></div>
+  </div>
+</section>
+
+<section class="panel" id="panel-osha">
+  <h2>Incidents &amp; the OSHA 300 log</h2>
+  <p class="pdesc">Every incident is reported here once. The ones that meet OSHA's recording criteria appear on the 300 log below — figured from the same record, never re-typed. <b>TalkBinder prepares the log; the owner makes the final call on every case.</b></p>
+  <div class="notebox"><b>Recording criteria — 29 CFR 1904.7:</b> a work-related injury or illness goes on the 300 log if it results in any of: death · days away from work · restricted work or transfer to another job · medical treatment beyond first aid · loss of consciousness · a significant injury or illness diagnosed by a physician or other licensed health care professional. First aid is the closed list at 1904.7(b)(5) — for example non-prescription medication at non-prescription strength, tetanus shots, hot/cold therapy, and bandages. Anything not on that list is medical treatment. Days away are counted in calendar days starting the day <i>after</i> the injury, capped at 180 (1904.7(b)(3)–(4)). Each case is entered on the log within 7 calendar days (1904.29(b)(3)). Separately, OSHA's reporting rule sets short clocks for telling OSHA about severe events — a fatality within 8 hours; an inpatient hospitalization, an amputation, or the loss of an eye within 24 hours (1904.39). <b>This helper is guidance drawn from the regulation text, not a ruling — borderline cases are the owner's call, and your safety consultant or OSHA's recordkeeping page is the authority.</b> Some very small employers are partially exempt from keeping the log unless asked (1904.1) — VERIFY your own status.</div>
+  <div class="formbox">
+    <h3 style="margin-top:0">Report an incident</h3>
+    <div class="fgrid">
+      <div class="fld"><label for="o_worker">Worker <span class="req">*</span></label><div class="inwrap"><input type="text" id="o_worker"><button type="button" class="mic" data-for="o_worker" aria-label="Dictate worker name">🎤</button></div></div>
+      <div class="fld"><label for="o_date">Date of injury / illness <span class="req">*</span></label><input type="date" id="o_date"></div>
+      <div class="fld"><label for="o_job">Job title</label><div class="inwrap"><input type="text" id="o_job"><button type="button" class="mic" data-for="o_job" aria-label="Dictate job title">🎤</button></div></div>
+      <div class="fld"><label for="o_loc">Where it happened</label><div class="inwrap"><input type="text" id="o_loc"><button type="button" class="mic" data-for="o_loc" aria-label="Dictate where it happened">🎤</button></div></div>
+      <div class="fld"><label for="o_class">Case classification (300 log) <span class="req">*</span></label><select id="o_class">
+        <option value="">Choose the most severe outcome…</option>
+        <option value="Death">Death</option>
+        <option value="Days away from work">Days away from work</option>
+        <option value="Job transfer or restriction">Job transfer or restriction</option>
+        <option value="Other recordable cases">Other recordable cases</option>
+        <option value="First aid only">First aid only — not on the log</option>
+      </select></div>
+      <div class="fld"><label for="o_type">Injury or illness</label><select id="o_type"><option value="Injury">Injury</option><option value="Illness">Illness</option></select></div>
+      <div class="fld"><label for="o_daysAway">Days away from work</label><div class="inwrap"><input type="number" id="o_daysAway" min="0" max="999" step="1" value="0"><button type="button" class="mic" data-for="o_daysAway" aria-label="Dictate days away">🎤</button></div></div>
+      <div class="fld"><label for="o_daysRestr">Days of restriction / transfer</label><div class="inwrap"><input type="number" id="o_daysRestr" min="0" max="999" step="1" value="0"><button type="button" class="mic" data-for="o_daysRestr" aria-label="Dictate days restricted">🎤</button></div></div>
+    </div>
+    <div class="fgrid" style="margin-top:14px">
+      <div class="fld"><label for="o_desc">What happened</label><div class="inwrap"><textarea id="o_desc" placeholder="The task being done and what happened, in plain words."></textarea><button type="button" class="mic" data-for="o_desc" aria-label="Dictate what happened">🎤</button></div></div>
+      <div class="fld"><label for="o_treat">Treatment given</label><div class="inwrap"><textarea id="o_treat" placeholder="First aid given, or where the worker was treated and what was done."></textarea><button type="button" class="mic" data-for="o_treat" aria-label="Dictate treatment given">🎤</button></div></div>
+    </div>
+    <div class="fld" style="margin-top:14px"><label>Did any of these happen? (1904.7 recording criteria)</label>
+      <div class="checks">
+        <label><input type="checkbox" class="o-crit" value="death"> Death</label>
+        <label><input type="checkbox" class="o-crit" value="away"> Days away from work</label>
+        <label><input type="checkbox" class="o-crit" value="restricted"> Restricted work or job transfer</label>
+        <label><input type="checkbox" class="o-crit" value="beyond"> Medical treatment beyond first aid</label>
+        <label><input type="checkbox" class="o-crit" value="loc"> Loss of consciousness</label>
+        <label><input type="checkbox" class="o-crit" value="diagnosed"> Significant injury/illness diagnosed by a physician or licensed health care professional</label>
+      </div>
+    </div>
+    <div class="notebox" id="o_guidance" style="margin-top:14px">Guidance: tick what happened and choose a classification — this line will say whether the case appears to meet a 1904.7 recording criterion. The final call is always the owner's.</div>
+    <div style="margin-top:6px"><button type="button" class="btn primary" id="o_save">Save incident</button></div>
+  </div>
+  <h3>Incident reports</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Date</th><th>Worker</th><th>What happened</th><th>Classification</th><th>On 300 log</th></tr></thead>
+    <tbody id="incBody"></tbody>
+  </table></div>
+  <h3>OSHA 300 log — recordable cases, 2026</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Date</th><th>Worker</th><th>Job title</th><th>Where</th><th>Classification</th><th>Days away</th><th>Days restricted</th><th>Type</th></tr></thead>
+    <tbody id="logBody"></tbody>
+  </table></div>
+  <h3>300A annual summary (from the log above)</h3>
+  <div class="notebox" id="sumBox"></div>
+  <p class="pdesc">Under 29 CFR 1904.32, at year end the company reviews the log, totals it on the 300A summary, has a company executive certify it, and posts it where employee notices go from <b>February 1 through April 30</b>. The log, the summary, and the incident reports are kept for <b>five years</b> (1904.33). TalkBinder figures the totals; the executive's certification and the posting are the company's to do.</p>
+</section>
+
+<section class="panel" id="panel-workers">
+  <h2>Worker cert wallets</h2>
+  <p class="pdesc">One wallet per worker: every certification on file, its issuer, and when it expires. In the full service, a photo of each card is kept with the record; in this demo the card details stand in for the photo.</p>
+  <div class="formbox">
+    <h3 style="margin-top:0">Add a worker</h3>
+    <div class="fgrid">
+      <div class="fld"><label for="w_name">Full name <span class="req">*</span></label><div class="inwrap"><input type="text" id="w_name"><button type="button" class="mic" data-for="w_name" aria-label="Dictate worker name">🎤</button></div></div>
+      <div class="fld"><label for="w_role">Role / trade</label><div class="inwrap"><input type="text" id="w_role" placeholder="e.g. Pipefitter"><button type="button" class="mic" data-for="w_role" aria-label="Dictate role">🎤</button></div></div>
+    </div>
+    <div style="margin-top:16px"><button type="button" class="btn primary" id="w_save">Add worker</button></div>
+  </div>
+  <div class="walletgrid" id="walletGrid"></div>
+</section>
+
+<section class="panel" id="panel-binder">
+  <h2>Produce the binder</h2>
+  <p class="pdesc">One tap assembles the audit binder for a project: cover sheet, completeness summary, talks with sign-offs, JSAs, inspections, the training matrix, and the OSHA 300 log — organized the way GCs ask for it. Print it or save it as a PDF from the print dialog.</p>
+  <div class="formbox">
+    <div class="fgrid">
+      <div class="fld"><label for="b_project">Project</label><select id="b_project"></select></div>
+      <div class="fld"><label for="b_prepared">Prepared by</label><div class="inwrap"><input type="text" id="b_prepared"><button type="button" class="mic" data-for="b_prepared" aria-label="Dictate prepared by">🎤</button></div></div>
+    </div>
+    <h3>What goes in — and what is still missing</h3>
+    <div id="binderChecklist"></div>
+    <div style="margin-top:16px"><button type="button" class="btn primary" id="b_produce">Produce the binder</button></div>
+    <p class="pdesc" style="margin-top:12px">The binder prints exactly what is on file — gaps included, listed on the cover sheet. TalkBinder does not hold anything back or dress anything up: an auditor who finds the same gap you already listed is an auditor who trusts the rest of the binder.</p>
+  </div>
+</section>
+
+<section class="panel" id="panel-help">
+  <h2>Help</h2>
+  <p class="pdesc">Short answers for the jobs TalkBinder does. Everything runs on this device; records are stored in this browser only.</p>
+  <details class="helpitem"><summary>How do I run a toolbox talk?</summary><p>Open Toolbox Talks, tap a topic from the library (or type your own), fill in the date, project, and who led it, tick who attended, and save. The sign-off sheet opens on the same device — pass it around, each attendee signs with a finger, and the signatures are filed with the talk.</p></details>
+  <details class="helpitem"><summary>How does the training matrix stay current?</summary><p>It is figured from the certification records every time it is shown. Add or renew a certification once — on the Training &amp; Certs screen or from the worker's wallet — and the matrix, the chase list, and the dashboard all move together.</p></details>
+  <details class="helpitem"><summary>What counts for the OSHA 300 log?</summary><p>The criteria in 29 CFR 1904.7, listed on the OSHA 300 screen: death, days away, restricted work or transfer, medical treatment beyond first aid, loss of consciousness, or a significant injury or illness diagnosed by a physician or other licensed health care professional. TalkBinder shows guidance from the regulation text; the final decision on every case belongs to the owner.</p></details>
+  <details class="helpitem"><summary>What does TalkBinder not do?</summary><p>TalkBinder prepares paperwork. It does not decide whether an injury is recordable, does not certify that your company is compliant, does not file anything with OSHA or anyone else, and does not replace your safety program, your competent persons, or your own judgment. Certifications and evaluations are performed by qualified people in the real world — TalkBinder keeps the records of them.</p></details>
+  <details class="helpitem"><summary>Where does my data live, and how do I back it up?</summary><p>On this device, in this browser's storage — nothing is uploaded. Back up from Settings below (Export backup saves a file of every record); import that file on any device to move or restore the binder. Export before you replace a phone or clear browser data.</p></details>
+  <p style="margin:14px 0"><a class="btn" id="emailUs" href="mailto:whitewolfbackoffice@gmail.com?subject=TalkBinder%20help%20%E2%80%94%20v0.1.0-demo&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A%0A%0A">Email us</a></p>
+  <div class="formbox">
+    <h3 style="margin-top:0">Pilot — the $249 audit-binder build</h3>
+    <p class="pdesc">We digitize your current safety paperwork — the glovebox forms, the foreman's text-thread photos, the training spreadsheet — and hand back a passing-ready binder for one real GC audit, in TalkBinder, with your crew's records in it. After that, TalkBinder is <b>$149/month flat — every worker, unlimited</b>. No per-seat charges: the per-user trap (at $24–$49 per user per month, putting 40 field workers on a typical platform runs $960–$1,960 a month) is exactly what this replaces.</p>
+    <div class="fgrid">
+      <div class="fld"><label for="pilotCompany">Company</label><div class="inwrap"><input type="text" id="pilotCompany"><button type="button" class="mic" data-for="pilotCompany" aria-label="Dictate company">🎤</button></div></div>
+      <div class="fld"><label for="pilotName">Your name</label><div class="inwrap"><input type="text" id="pilotName"><button type="button" class="mic" data-for="pilotName" aria-label="Dictate your name">🎤</button></div></div>
+      <div class="fld"><label for="pilotEmail">Your email</label><div class="inwrap"><input type="text" id="pilotEmail"><button type="button" class="mic" data-for="pilotEmail" aria-label="Dictate your email">🎤</button></div></div>
+      <div class="fld"><label for="pilotWorkers">How many workers</label><div class="inwrap"><input type="number" id="pilotWorkers" min="1" max="9999" step="1"><button type="button" class="mic" data-for="pilotWorkers" aria-label="Dictate how many workers">🎤</button></div></div>
+    </div>
+    <div class="fld" style="margin-top:14px"><label for="pilotNote">Anything we should know</label><div class="inwrap"><textarea id="pilotNote" placeholder="e.g. GC audit coming in March; our records are in three ring binders and a spreadsheet."></textarea><button type="button" class="mic" data-for="pilotNote" aria-label="Dictate note">🎤</button></div></div>
+    <div class="checks" style="margin-top:14px"><label><input type="checkbox" id="pilotAgree"> I understand TalkBinder prepares the binder and keeps the records — my company reviews everything, makes the safety and recordability decisions, and answers for them.</label></div>
+    <div style="margin-top:16px"><button type="button" class="btn primary" id="pilotSend" disabled>Request the $249 pilot</button></div>
+  </div>
+  <div class="formbox">
+    <h3 style="margin-top:0">Settings &amp; your data</h3>
+    <div class="fgrid">
+      <div class="fld"><label for="s_company">Company name</label><div class="inwrap"><input type="text" id="s_company"><button type="button" class="mic" data-for="s_company" aria-label="Dictate company name">🎤</button></div></div>
+      <div class="fld"><label for="s_gc">General contractor (auditor)</label><div class="inwrap"><input type="text" id="s_gc"><button type="button" class="mic" data-for="s_gc" aria-label="Dictate general contractor">🎤</button></div></div>
+      <div class="fld"><label for="s_project">Audit project</label><div class="inwrap"><input type="text" id="s_project"><button type="button" class="mic" data-for="s_project" aria-label="Dictate audit project">🎤</button></div></div>
+      <div class="fld"><label for="s_auditDate">Audit date</label><input type="date" id="s_auditDate"></div>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap">
+      <button type="button" class="btn plain" id="s_save">Save settings</button>
+      <button type="button" class="btn plain" id="d_export">Export backup</button>
+      <button type="button" class="btn plain" id="d_importBtn">Import backup</button>
+      <input type="file" id="d_import" accept=".json,application/json" style="display:none">
+      <button type="button" class="btn plain" id="d_reset">Reset demo data</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="modalwrap" id="signModal">
+  <div class="modal">
+    <h3 id="signTitle">Talk sign-offs</h3>
+    <p class="pdesc">Pass the device around — each attendee signs in their own box. A signature is the attendee's own mark, made on this device; TalkBinder records it with the talk.</p>
+    <div id="signList"></div>
+    <div style="margin-top:14px"><button type="button" class="btn primary" id="signDone">Done</button></div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+<div id="printArea"></div>
+<footer>TalkBinder v0.1.0-demo · Demo — every company, person, and record shown is fictional · Records live on this device only · TalkBinder prepares the binder; your company reviews it, makes the safety decisions, and answers for them · Seller: White Wolf Apps · Support: whitewolfbackoffice@gmail.com</footer>
+
+<script>
+"use strict";
+var KEY = "talkbinder_demo_v1", BKEY = KEY + "_backup", CKEY = KEY + "_corrupt";
+var VERSION = "v0.1.0-demo";
+var state = null, recoveredNote = "";
+var guardMap = {};
+var TOPIC_LIBRARY = ["Fall Protection","Lockout/Tagout","Scaffold Safety","Silica Dust","Electrical Safety","Trenching & Excavation","Forklift & Pedestrian Safety","Hot Work & Fire Watch","Housekeeping & Slip Hazards","PPE — Eye & Hand Protection","Cold Stress & Winter Weather","Ladder Safety","Crane & Rigging Awareness","Heat Illness Prevention","Confined Space Awareness","Hand & Power Tool Safety"];
+var REQUIRED_TOPICS = ["Fall Protection","Lockout/Tagout","Scaffold Safety","Silica Dust","Electrical Safety","Trenching & Excavation","Forklift & Pedestrian Safety","Hot Work & Fire Watch","Housekeeping & Slip Hazards","PPE — Eye & Hand Protection","Cold Stress & Winter Weather","Ladder Safety"];
+var REQUIRED_CERTS = [
+  {name:"OSHA 10-Hour Construction", needs:"ALL"},
+  {name:"Forklift Operator Evaluation", needs:["Dale Mercer","Marcus Webb","Pete Harjo","Frank Tillman","Nate Hilderbrand","Zack Holloway","Bill Kowalski","Tony Marchetti"]},
+  {name:"Aerial Lift Operator", needs:["Sam Delgado","Dave Folsom","Jack Merritt","Ray Featherston","Rosa Delgado","Aaron Begay","George Antwine","Oscar Reyes","Hank Beaumont","Chris Yellowman","Larry Voss","Victor Hale","Kyle Brandt"]},
+  {name:"First Aid/CPR", needs:["Bill Kowalski","Mike Ostrander","Steve Kickingbird","Ruth Callahan","Nina Kowalski","Yolanda Pierce"]},
+  {name:"Fall Protection Competent Person", needs:["Bill Kowalski","Mike Ostrander","Steve Kickingbird","Nina Kowalski"]}
+];
+var CLASSES = ["Death","Days away from work","Job transfer or restriction","Other recordable cases","First aid only"];
+
+function $(id){ return document.getElementById(id); }
+function isPlainObject(x){ return !!x && typeof x === "object" && !Array.isArray(x); }
+function asStr(x){ return (x === null || x === undefined) ? "" : String(x); }
+function trimStr(x){ return asStr(x).trim(); }
+function clampStr(x, max){ var s = asStr(x); return s.length > max ? s.slice(0, max) : s; }
+function esc(s){ return asStr(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function asIntIn(x, lo, hi, dflt){ var n = parseInt(x, 10); if(isNaN(n)) return dflt; if(n < lo) return lo; if(n > hi) return hi; return n; }
+function uid(p){ return p + "-" + Date.now().toString(36) + Math.floor(Math.random()*99999).toString(36); }
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function pad2(n){ return (n < 10 ? "0" : "") + n; }
+function todayStr(){ var d = new Date(); return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+function isValidDateString(s){ if(typeof s !== "string") return false; var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); if(!m) return false; var y=+m[1], mo=+m[2], d=+m[3]; if(mo<1||mo>12||d<1||d>31) return false; var dt = new Date(Date.UTC(y, mo-1, d)); return dt.getUTCFullYear()===y && dt.getUTCMonth()===mo-1 && dt.getUTCDate()===d; }
+function asDateOrEmpty(x){ var s = asStr(x); return isValidDateString(s) ? s : ""; }
+function parseD(s){ var p = s.split("-"); return Date.UTC(+p[0], +p[1]-1, +p[2]); }
+function fmtD(s){ if(!isValidDateString(s)) return "—"; var p = s.split("-"); return MONTHS[+p[1]-1] + " " + (+p[2]) + ", " + p[0]; }
+function daysBetween(a, b){ return Math.round((parseD(b) - parseD(a)) / 86400000); }
+function toast(msg){ var t = $("toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(t._h); t._h = setTimeout(function(){ t.style.display = "none"; }, 3600); }
+function guard(key, payload){ var h = key + "|" + JSON.stringify(payload); var now = Date.now(); if(guardMap[h] && (now - guardMap[h]) < 1500) return false; guardMap[h] = now; return true; }
+
+function seedState(){
+  var W = [
+    ["Dale Mercer","Material Handler"],["Marcus Webb","Material Handler"],["Hank Beaumont","Ironworker"],["Rosa Delgado","Welder"],
+    ["Tommy Nguyen","Apprentice"],["Bill Kowalski","Foreman"],["Sam Delgado","Pipefitter"],["Pete Harjo","Yard Lead"],
+    ["Grace Lone","Electrician"],["Jesse Tallchief","Pipefitter"],["Nina Kowalski","Safety Lead"],["Cody Pruitt","Apprentice"],
+    ["Aaron Begay","Welder"],["Ruth Callahan","Superintendent"],["Tanya Ruiz","Sheet Metal Worker"],["Mike Ostrander","Foreman"],
+    ["Chris Yellowman","Ironworker"],["Dave Folsom","Pipefitter"],["Eddie Redbird","Laborer"],["Frank Tillman","Material Handler"],
+    ["George Antwine","Welder"],["Henry Cloud","Sheet Metal Worker"],["Ivan Petrov","Electrician"],["Jack Merritt","Pipefitter"],
+    ["Kyle Brandt","Apprentice"],["Larry Voss","Ironworker"],["Marty Quinn","Laborer"],["Nate Hilderbrand","Material Handler"],
+    ["Oscar Reyes","Welder"],["Paul Sandoval","Sheet Metal Worker"],["Ray Featherston","Pipefitter"],["Steve Kickingbird","Foreman"],
+    ["Tony Marchetti","Electrician"],["Victor Hale","Ironworker"],["Wade Zimmerman","Laborer"],["Xavier Luna","Apprentice"],
+    ["Yolanda Pierce","Safety Coordinator"],["Zack Holloway","Yard Lead"]
+  ];
+  var workers = W.map(function(w, i){ return {id:"w" + (i+1), name:w[0], role:w[1]}; });
+  var byName = {}; workers.forEach(function(w){ byName[w.name] = w.id; });
+  var certs = [], cn = 100;
+  function addCert(name, certName, issuer, issued, expires){ certs.push({id:"c" + (++cn), workerId:byName[name], name:certName, issuer:issuer, number:"OMC-" + cn, issued:issued, expires:expires}); }
+  workers.forEach(function(w, i){
+    var mo = pad2((i % 12) + 1), dy = pad2((i % 27) + 1);
+    addCert(w.name, "OSHA 10-Hour Construction", "OSHA Outreach — authorized trainer", "2025-" + mo + "-" + dy, "");
+  });
+  var FL = "Forklift Operator Evaluation", FLI = "Ozark Mechanical — in-house evaluator";
+  addCert("Dale Mercer", FL, FLI, "2022-08-15", "2025-08-15");
+  addCert("Marcus Webb", FL, FLI, "2022-10-02", "2025-10-02");
+  addCert("Pete Harjo", FL, FLI, "2024-05-20", "2027-05-20");
+  addCert("Frank Tillman", FL, FLI, "2024-02-11", "2027-02-11");
+  addCert("Nate Hilderbrand", FL, FLI, "2023-12-01", "2026-12-01");
+  addCert("Zack Holloway", FL, FLI, "2024-08-19", "2027-08-19");
+  addCert("Bill Kowalski", FL, FLI, "2024-01-25", "2027-01-25");
+  addCert("Tony Marchetti", FL, FLI, "2025-03-03", "2028-03-03");
+  var AL = "Aerial Lift Operator", ALI = "United Academy";
+  addCert("Sam Delgado", AL, ALI, "2024-11-25", "2026-11-25");
+  addCert("Dave Folsom", AL, ALI, "2025-04-14", "2027-04-14");
+  addCert("Jack Merritt", AL, ALI, "2025-06-30", "2027-06-30");
+  addCert("Ray Featherston", AL, ALI, "2025-02-18", "2027-02-18");
+  addCert("Rosa Delgado", AL, ALI, "2025-09-09", "2027-09-09");
+  addCert("Aaron Begay", AL, ALI, "2026-01-22", "2028-01-22");
+  addCert("George Antwine", AL, ALI, "2025-05-05", "2027-05-05");
+  addCert("Oscar Reyes", AL, ALI, "2025-10-16", "2027-10-16");
+  addCert("Hank Beaumont", AL, ALI, "2025-03-27", "2027-03-27");
+  addCert("Chris Yellowman", AL, ALI, "2025-07-07", "2027-07-07");
+  addCert("Larry Voss", AL, ALI, "2026-02-02", "2028-02-02");
+  addCert("Victor Hale", AL, ALI, "2025-08-25", "2027-08-25");
+  var FA = "First Aid/CPR", FAI = "American Red Cross";
+  addCert("Bill Kowalski", FA, FAI, "2025-05-14", "2027-05-14");
+  addCert("Mike Ostrander", FA, FAI, "2025-08-21", "2027-08-21");
+  addCert("Steve Kickingbird", FA, FAI, "2025-03-09", "2027-03-09");
+  addCert("Ruth Callahan", FA, FAI, "2025-11-02", "2027-11-02");
+  addCert("Nina Kowalski", FA, FAI, "2025-06-17", "2027-06-17");
+  addCert("Yolanda Pierce", FA, FAI, "2025-09-28", "2027-09-28");
+  var CP = "Fall Protection Competent Person", CPI = "Ozark Safety Training";
+  addCert("Bill Kowalski", CP, CPI, "2025-04-11", "2027-04-11");
+  addCert("Mike Ostrander", CP, CPI, "2025-10-05", "2027-10-05");
+  addCert("Steve Kickingbird", CP, CPI, "2025-01-19", "2027-01-19");
+  addCert("Nina Kowalski", CP, CPI, "2025-07-23", "2027-07-23");
+  function talk(id, date, topic, project, loc, ledBy, notes, attendees, unsigned){
+    var att = attendees.map(function(n){ return byName[n]; });
+    var sigs = {};
+    att.forEach(function(wid, ix){ if(!unsigned || unsigned.indexOf(attendees[ix]) === -1) sigs[wid] = "signed"; });
+    return {id:id, date:date, topic:topic, project:project, location:loc, ledBy:ledBy, notes:notes, attendees:att, signatures:sigs};
+  }
+  var RB = "Riverbend Hospital Expansion", GL = "Grand Lake Pump Station";
+  var talks = [
+    talk("t9","2026-09-07","Ladder Safety",RB,"Stair tower B","Bill Kowalski","Three points of contact, the 4-to-1 angle, and inspecting rungs before climbing.",["Tommy Nguyen","Cody Pruitt","Xavier Luna","Kyle Brandt","Eddie Redbird"]),
+    talk("t1","2026-09-14","Fall Protection",RB,"Level 3 deck","Nina Kowalski","Harness inspection, anchor points, and the six-foot rule on the Level 3 deck.",["Hank Beaumont","Chris Yellowman","Larry Voss","Victor Hale","Sam Delgado","Dave Folsom","Jack Merritt","Ray Featherston"]),
+    talk("t2","2026-09-21","Lockout/Tagout",RB,"Mechanical room B","Bill Kowalski","Lock and tag steps for the air handlers; who holds which key.",["Grace Lone","Ivan Petrov","Tony Marchetti","Jesse Tallchief","Sam Delgado","Dave Folsom","Kyle Brandt"]),
+    talk("t3","2026-09-28","Scaffold Safety",RB,"South elevation","Mike Ostrander","Planking, guardrails, toe boards, and tag checks before climbing.",["Hank Beaumont","Chris Yellowman","Larry Voss","Victor Hale","Bill Kowalski","Mike Ostrander","Steve Kickingbird","Eddie Redbird","Marty Quinn"]),
+    talk("t4","2026-10-05","Silica Dust",GL,"Cutting station","Nina Kowalski","Wet cutting, respirator fit checks, and where the dust controls live.",["Tanya Ruiz","Henry Cloud","Paul Sandoval","Dave Folsom","Sam Delgado","Zack Holloway"]),
+    talk("t5","2026-10-12","Electrical Safety",RB,"Temp power panels","Grace Lone","GFCI checks, cord inspection, and panel clearances.",["Grace Lone","Ivan Petrov","Tony Marchetti","Jesse Tallchief","Rosa Delgado","Aaron Begay","George Antwine","Oscar Reyes"]),
+    talk("t6","2026-10-19","Trenching & Excavation",RB,"North utility run","Steve Kickingbird","Trench box before entry, 811 tickets, and the spotter's job.",["Eddie Redbird","Marty Quinn","Wade Zimmerman","Frank Tillman","Nate Hilderbrand","Pete Harjo","Marcus Webb"]),
+    talk("t7","2026-10-26","Forklift & Pedestrian Safety",RB,"Material yard","Pete Harjo","Spotters in the yard, horn at corners, and no riders — ever.",["Dale Mercer","Marcus Webb","Pete Harjo","Frank Tillman","Nate Hilderbrand","Zack Holloway"]),
+    talk("t8","2026-11-02","Hot Work & Fire Watch",RB,"Level 2 west wing","Nina Kowalski","Permit steps, the 30-minute fire watch, and extinguisher locations.",["Rosa Delgado","Aaron Begay","George Antwine","Oscar Reyes","Hank Beaumont","Victor Hale","Tommy Nguyen","Cody Pruitt"],["Tommy Nguyen","Cody Pruitt"])
+  ];
+  function jsa(id, date, task, project, by, hazards, controls, ppe, crew){
+    return {id:id, date:date, jobTask:task, project:project, preparedBy:by, hazards:hazards, controls:controls, ppe:ppe, crew:crew.map(function(n){ return byName[n]; })};
+  }
+  var jsas = [
+    jsa("j1","2026-10-30","Overhead duct installation — Level 3",RB,"Mike Ostrander","Falls from ladders\nDropped material\nOverhead electrical conduit","A-frame ladders inspected; tool lanyards in the work zone\nHard-hat area below, barricaded\nCircuits verified de-energized before work above ceilings","Hard hat, eye protection, gloves; harness where the deck edge is open",["Tanya Ruiz","Henry Cloud","Paul Sandoval","Dave Folsom","Sam Delgado"]),
+    jsa("j2","2026-11-03","Chilled-water pipe tie-in",RB,"Bill Kowalski","Pressurized lines\nHot work nearby\nManual lifting of pipe sections","Lines drained and verified at zero pressure; lockout on pumps\nFire watch posted during cutting\nTeam lifts and the pipe cart for sections over 50 lb","Hard hat, eye protection, face shield for cutting, gloves",["Sam Delgado","Dave Folsom","Jack Merritt","Ray Featherston"]),
+    jsa("j3","2026-10-20","Excavation for underground conduit",GL,"Steve Kickingbird","Trench wall collapse\nUnderground utilities\nEquipment swing radius","Trench box in place before entry\n811 locate tickets in hand; hand-dig within 18 in of marks\nSpotter assigned; barricades at the swing radius","Hard hat, hi-vis, steel toes, gloves",["Eddie Redbird","Marty Quinn","Wade Zimmerman","Frank Tillman","Nate Hilderbrand"]),
+    jsa("j4","2026-11-06","Rooftop unit set with crane pick",RB,"Ruth Callahan","Suspended load\nWind gusts\nRoof edge exposure","Critical-lift plan signed; tag lines on the unit\nPick stops if gusts pass 20 mph\nEdge warning line at 6 ft; harness tie-off beyond it","Hard hat, eye protection, gloves, harness beyond the warning line",["Hank Beaumont","Chris Yellowman","Larry Voss","Victor Hale","Bill Kowalski","Mike Ostrander"])
+  ];
+  var inspections = [
+    {id:"i1", date:"2026-11-02", equipment:"Telehandler", equipId:"TH-2", inspector:"Pete Harjo", result:"Pass", defects:"Fluid levels good; forks and carriage pins sound."},
+    {id:"i2", date:"2026-10-26", equipment:"Scissor lift", equipId:"SL-1", inspector:"Zack Holloway", result:"Pass", defects:"Rails, gate chain, and pothole protection checked."},
+    {id:"i3", date:"2026-11-05", equipment:"Forklift", equipId:"FL-1", inspector:"Pete Harjo", result:"Defects found", defects:"Backup alarm intermittent — tagged out of service until repaired. Do not operate."},
+    {id:"i4", date:"2026-10-19", equipment:"Scaffold", equipId:"S-3", inspector:"Mike Ostrander", result:"Pass", defects:"Fully planked; guardrails and toe boards in place; tags current."},
+    {id:"i5", date:"2026-11-07", equipment:"Fall protection harnesses (set of 6)", equipId:"FP-SET-1", inspector:"Nina Kowalski", result:"Pass", defects:"Webbing, stitching, and hardware inspected; no cuts or UV damage found."}
+  ];
+  var incidents = [
+    {id:"o1", date:"2026-01-27", workerName:"Hank Beaumont", jobTitle:"Ironworker", location:"Roof deck, Riverbend Hospital Expansion", description:"Stepped off a 4-foot ladder onto uneven decking and fell, landing on his left wrist.", treatment:"Taken to urgent care; X-ray showed a fractured wrist; cast applied.", classification:"Job transfer or restriction", type:"Injury", daysAway:5, daysRestricted:12, recordable:true},
+    {id:"o2", date:"2026-03-12", workerName:"Dale Mercer", jobTitle:"Material Handler", location:"Material yard", description:"Forearm caught the edge of a cut duct section while unloading; laceration to the left forearm.", treatment:"Urgent care — wound cleaned and closed with 6 sutures; light duty for 3 days.", classification:"Job transfer or restriction", type:"Injury", daysAway:0, daysRestricted:3, recordable:true},
+    {id:"o3", date:"2026-06-24", workerName:"Rosa Delgado", jobTitle:"Welder", location:"Level 2 west wing", description:"Welding flash exposure to both eyes while a screen was down.", treatment:"Examined at the eye clinic; prescription drops given; returned to full duty the same day.", classification:"Other recordable cases", type:"Injury", daysAway:0, daysRestricted:0, recordable:true},
+    {id:"o4", date:"2026-09-18", workerName:"Tommy Nguyen", jobTitle:"Apprentice", location:"Stair tower B", description:"Twisted his ankle on the stair landing; swelling at the ankle.", treatment:"First aid on site — ice, elastic wrap, and over-the-counter ibuprofen at the labeled dose; finished the shift and worked full duty the next day.", classification:"First aid only", type:"Injury", daysAway:0, daysRestricted:0, recordable:false}
+  ];
+  return {
+    settings:{company:"Ozark Mechanical Contractors", gc:"Riverbend Builders Group", project:"Riverbend Hospital Expansion", auditDate:"2026-11-20", targets:{jsas:5, inspections:6}},
+    workers:workers, certs:certs, talks:talks, jsas:jsas, inspections:inspections, incidents:incidents
+  };
+}
+
+function sanSettings(o){
+  o = isPlainObject(o) ? o : {};
+  var t = isPlainObject(o.targets) ? o.targets : {};
+  return {
+    company: clampStr(asStr(o.company), 120) || "Ozark Mechanical Contractors",
+    gc: clampStr(asStr(o.gc), 120),
+    project: clampStr(asStr(o.project), 120),
+    auditDate: asDateOrEmpty(o.auditDate),
+    targets: { jsas: asIntIn(t.jsas, 1, 99, 5), inspections: asIntIn(t.inspections, 1, 99, 6) }
+  };
+}
+function sanWorker(o){
+  if(!isPlainObject(o)) return null;
+  var id = clampStr(asStr(o.id), 40), name = clampStr(trimStr(o.name), 80);
+  if(!id || !name) return null;
+  return { id:id, name:name, role:clampStr(asStr(o.role), 60) };
+}
+function sanCert(o, validWorkers){
+  if(!isPlainObject(o)) return null;
+  var id = clampStr(asStr(o.id), 40), wid = clampStr(asStr(o.workerId), 40), name = clampStr(trimStr(o.name), 80);
+  if(!id || !name || !validWorkers[wid]) return null;
+  return { id:id, workerId:wid, name:name, issuer:clampStr(asStr(o.issuer), 100), number:clampStr(asStr(o.number), 60),
+           issued:asDateOrEmpty(o.issued), expires:asDateOrEmpty(o.expires) };
+}
+function sanTalk(o, validWorkers){
+  if(!isPlainObject(o)) return null;
+  var id = clampStr(asStr(o.id), 40), topic = clampStr(trimStr(o.topic), 100), date = asDateOrEmpty(o.date);
+  if(!id || !topic || !date) return null;
+  var att = [], seen = {};
+  if(Array.isArray(o.attendees)) o.attendees.forEach(function(w){ var s = clampStr(asStr(w), 40); if(validWorkers[s] && !seen[s]){ seen[s] = 1; att.push(s); } });
+  if(att.length > 200) att = att.slice(0, 200);
+  var sigs = {};
+  if(isPlainObject(o.signatures)) Object.keys(o.signatures).forEach(function(k){
+    var kk = clampStr(asStr(k), 40);
+    if(validWorkers[kk] && att.indexOf(kk) !== -1){
+      var v = o.signatures[k];
+      sigs[kk] = (typeof v === "string" && v.indexOf("data:image/") === 0) ? clampStr(v, 400000) : "signed";
+    }
+  });
+  return { id:id, date:date, topic:topic, project:clampStr(asStr(o.project), 120), location:clampStr(asStr(o.location), 120),
+           ledBy:clampStr(asStr(o.ledBy), 80), notes:clampStr(asStr(o.notes), 2000), attendees:att, signatures:sigs };
+}
+function sanJsa(o, validWorkers){
+  if(!isPlainObject(o)) return null;
+  var id = clampStr(asStr(o.id), 40), task = clampStr(trimStr(o.jobTask), 160), date = asDateOrEmpty(o.date);
+  if(!id || !task || !date) return null;
+  var crew = [], seen = {};
+  if(Array.isArray(o.crew)) o.crew.forEach(function(w){ var s = clampStr(asStr(w), 40); if(validWorkers[s] && !seen[s]){ seen[s] = 1; crew.push(s); } });
+  if(crew.length > 200) crew = crew.slice(0, 200);
+  return { id:id, date:date, jobTask:task, project:clampStr(asStr(o.project), 120), preparedBy:clampStr(asStr(o.preparedBy), 80),
+           hazards:clampStr(asStr(o.hazards), 2000), controls:clampStr(asStr(o.controls), 2000), ppe:clampStr(asStr(o.ppe), 300), crew:crew };
+}
+function sanInsp(o){
+  if(!isPlainObject(o)) return null;
+  var id = clampStr(asStr(o.id), 40), equip = clampStr(trimStr(o.equipment), 120), date = asDateOrEmpty(o.date);
+  if(!id || !equip || !date) return null;
+  return { id:id, date:date, equipment:equip, equipId:clampStr(asStr(o.equipId), 40), inspector:clampStr(asStr(o.inspector), 80),
+           result:(o.result === "Defects found" ? "Defects found" : "Pass"), defects:clampStr(asStr(o.defects), 1000) };
+}
+function sanIncident(o){
+  if(!isPlainObject(o)) return null;
+  var id = clampStr(asStr(o.id), 40), name = clampStr(trimStr(o.workerName), 80), date = asDateOrEmpty(o.date);
+  if(!id || !name || !date) return null;
+  var cls = CLASSES.indexOf(o.classification) !== -1 ? o.classification : "Other recordable cases";
+  return { id:id, date:date, workerName:name, jobTitle:clampStr(asStr(o.jobTitle), 60), location:clampStr(asStr(o.location), 120),
+           description:clampStr(asStr(o.description), 1500), treatment:clampStr(asStr(o.treatment), 1500), classification:cls,
+           type:(o.type === "Illness" ? "Illness" : "Injury"), daysAway:asIntIn(o.daysAway, 0, 180, 0), daysRestricted:asIntIn(o.daysRestricted, 0, 180, 0),
+           recordable:(cls !== "First aid only") };
+}
+function sanitizeState(raw){
+  if(!isPlainObject(raw)) return null;
+  var workers = [];
+  if(Array.isArray(raw.workers)) raw.workers.forEach(function(o){ var w = sanWorker(o); if(w) workers.push(w); });
+  if(workers.length > 500) workers = workers.slice(0, 500);
+  var validWorkers = {}; workers.forEach(function(w){ validWorkers[w.id] = 1; });
+  var certs = [], talks = [], jsas = [], inspections = [], incidents = [];
+  if(Array.isArray(raw.certs)) raw.certs.forEach(function(o){ var c = sanCert(o, validWorkers); if(c) certs.push(c); });
+  if(Array.isArray(raw.talks)) raw.talks.forEach(function(o){ var t = sanTalk(o, validWorkers); if(t) talks.push(t); });
+  if(Array.isArray(raw.jsas)) raw.jsas.forEach(function(o){ var j = sanJsa(o, validWorkers); if(j) jsas.push(j); });
+  if(Array.isArray(raw.inspections)) raw.inspections.forEach(function(o){ var i2 = sanInsp(o); if(i2) inspections.push(i2); });
+  if(Array.isArray(raw.incidents)) raw.incidents.forEach(function(o){ var n = sanIncident(o); if(n) incidents.push(n); });
+  if(certs.length > 2000) certs = certs.slice(0, 2000);
+  if(talks.length > 1000) talks = talks.slice(0, 1000);
+  if(jsas.length > 1000) jsas = jsas.slice(0, 1000);
+  if(inspections.length > 2000) inspections = inspections.slice(0, 2000);
+  if(incidents.length > 1000) incidents = incidents.slice(0, 1000);
+  return { settings: sanSettings(raw.settings), workers:workers, certs:certs, talks:talks, jsas:jsas, inspections:inspections, incidents:incidents };
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  try{ localStorage.setItem(BKEY, JSON.stringify(state)); }catch(e){}
+}
+function load(){
+  var rawStr = null;
+  try{ rawStr = localStorage.getItem(KEY); }catch(e){}
+  if(rawStr){
+    try{
+      var parsed = JSON.parse(rawStr);
+      var clean = sanitizeState(parsed);
+      if(clean){ state = clean; return; }
+    }catch(e){}
+    try{ localStorage.setItem(CKEY, rawStr); }catch(e2){}
+    var bak = null;
+    try{ bak = localStorage.getItem(BKEY); }catch(e3){}
+    if(bak){
+      try{ var bc = sanitizeState(JSON.parse(bak)); if(bc){ state = bc; recoveredNote = "backup"; return; } }catch(e4){}
+    }
+    state = seedState(); recoveredNote = "reseed"; return;
+  }
+  var bak2 = null;
+  try{ bak2 = localStorage.getItem(BKEY); }catch(e5){}
+  if(bak2){ try{ var bc2 = sanitizeState(JSON.parse(bak2)); if(bc2){ state = bc2; return; } }catch(e6){} }
+  state = seedState();
+}
+function workerById(id){ for(var i=0;i<state.workers.length;i++) if(state.workers[i].id === id) return state.workers[i]; return null; }
+function workerName(id){ var w = workerById(id); return w ? w.name : "Unknown worker"; }
+function certStatus(c, today){
+  if(!c.expires) return "current";
+  if(c.expires < today) return "expired";
+  if(daysBetween(today, c.expires) <= 30) return "expiring";
+  return "current";
+}
+function needsFor(req){
+  if(req.needs === "ALL") return state.workers.slice();
+  var out = [];
+  req.needs.forEach(function(nm){ for(var i=0;i<state.workers.length;i++) if(state.workers[i].name === nm){ out.push(state.workers[i]); break; } });
+  return out;
+}
+function certFor(workerId, certName){
+  var best = null;
+  state.certs.forEach(function(c){ if(c.workerId === workerId && c.name === certName){ if(!best || (c.expires || "9999") > (best.expires || "9999")) best = c; } });
+  return best;
+}
+function computeStats(){
+  var today = todayStr();
+  var topicsCovered = {};
+  state.talks.forEach(function(t){ topicsCovered[t.topic] = 1; });
+  var topicsDone = REQUIRED_TOPICS.filter(function(t){ return topicsCovered[t]; }).length;
+  var topicsMissing = REQUIRED_TOPICS.filter(function(t){ return !topicsCovered[t]; });
+  var attTotal = 0, sigTotal = 0, unsignedTalks = 0;
+  state.talks.forEach(function(t){
+    attTotal += t.attendees.length;
+    var s = 0; t.attendees.forEach(function(wid){ if(t.signatures[wid]) s++; });
+    sigTotal += s; if(s < t.attendees.length) unsignedTalks++;
+  });
+  var reqAssign = 0, haveAssign = 0, expiredCerts = [], expiringCerts = [], missingCerts = [];
+  REQUIRED_CERTS.forEach(function(req){
+    needsFor(req).forEach(function(w){
+      reqAssign++;
+      var c = certFor(w.id, req.name);
+      if(!c){ missingCerts.push({worker:w, certName:req.name}); return; }
+      var st = certStatus(c, today);
+      if(st === "expired"){ expiredCerts.push({worker:w, cert:c}); }
+      else { haveAssign++; if(st === "expiring") expiringCerts.push({worker:w, cert:c}); }
+    });
+  });
+  var rec = state.incidents.filter(function(n){ return n.recordable; });
+  var sum300a = { total:rec.length, death:0, awayCases:0, awayDays:0, restrCases:0, restrDays:0, other:0, injuries:0, illnesses:0 };
+  rec.forEach(function(n){
+    if(n.classification === "Death") sum300a.death++;
+    else if(n.classification === "Other recordable cases") sum300a.other++;
+    if(n.daysAway > 0) sum300a.awayCases++;
+    if(n.daysRestricted > 0) sum300a.restrCases++;
+    sum300a.awayDays += n.daysAway; sum300a.restrDays += n.daysRestricted;
+    if(n.type === "Illness") sum300a.illnesses++; else sum300a.injuries++;
+  });
+  function pct(done, total){ return total > 0 ? Math.round(100 * done / total) : 100; }
+  var cats = [
+    { key:"talks", label:"Toolbox talks", ask:"One documented talk per audit-required topic", done:topicsDone, total:REQUIRED_TOPICS.length, pct:pct(topicsDone, REQUIRED_TOPICS.length) },
+    { key:"jsas", label:"Job safety analyses", ask:"A current JSA for each high-risk task", done:Math.min(state.jsas.length, state.settings.targets.jsas), total:state.settings.targets.jsas, pct:pct(Math.min(state.jsas.length, state.settings.targets.jsas), state.settings.targets.jsas) },
+    { key:"insp", label:"Equipment inspections", ask:"Current pre-use inspections for site equipment", done:Math.min(state.inspections.length, state.settings.targets.inspections), total:state.settings.targets.inspections, pct:pct(Math.min(state.inspections.length, state.settings.targets.inspections), state.settings.targets.inspections) },
+    { key:"train", label:"Training & certifications", ask:"Every required certification held and current", done:haveAssign, total:reqAssign, pct:pct(haveAssign, reqAssign) },
+    { key:"osha", label:"OSHA 300 log", ask:"Every incident decided and on the log if recordable", done:state.incidents.length, total:state.incidents.length, pct:100 },
+    { key:"sign", label:"Talk sign-offs", ask:"Every attendee signed their talk sheet", done:sigTotal, total:attTotal, pct:pct(sigTotal, attTotal) }
+  ];
+  var overall = cats.length ? Math.round(cats.reduce(function(a, c){ return a + c.pct; }, 0) / cats.length) : 100;
+  var auditDays = state.settings.auditDate ? daysBetween(today, state.settings.auditDate) : null;
+  return { today:today, topicsCovered:topicsCovered, topicsDone:topicsDone, topicsMissing:topicsMissing, attTotal:attTotal, sigTotal:sigTotal,
+           unsignedTalks:unsignedTalks, reqAssign:reqAssign, haveAssign:haveAssign, expiredCerts:expiredCerts, expiringCerts:expiringCerts,
+           missingCerts:missingCerts, sum300a:sum300a, cats:cats, overall:overall, auditDays:auditDays };
+}
+function chaseItems(st){
+  var items = [];
+  st.expiredCerts.forEach(function(x){ items.push({ kind:"Expired certification", detail: x.worker.name + " — " + x.cert.name + " expired " + fmtD(x.cert.expires) + ". Renew or re-evaluate before this worker does that work." }); });
+  st.missingCerts.forEach(function(x){ items.push({ kind:"Missing certification", detail: x.worker.name + " — no " + x.certName + " on file." }); });
+  st.topicsMissing.forEach(function(t){ items.push({ kind:"Missing talk topic", detail: "No talk on file for the audit-required topic \"" + t + "\" — run the talk and collect sign-offs." }); });
+  state.talks.forEach(function(t){
+    var un = t.attendees.filter(function(wid){ return !t.signatures[wid]; });
+    if(un.length) items.push({ kind:"Unsigned sign-offs", detail: fmtD(t.date) + " talk (" + t.topic + ") — " + un.length + " of " + t.attendees.length + " attendees have not signed: " + un.map(workerName).join(", ") + "." });
+  });
+  return items;
+}
+
+function showPanel(name){
+  var panels = document.querySelectorAll(".panel");
+  for(var i=0;i<panels.length;i++) panels[i].classList.toggle("active", panels[i].id === "panel-" + name);
+  var btns = document.querySelectorAll("#mainNav button");
+  for(var j=0;j<btns.length;j++) btns[j].classList.toggle("active", btns[j].getAttribute("data-view") === name);
+  renderAll();
+  window.scrollTo(0, 0);
+}
+function pctClass(p){ return p >= 100 ? "done" : (p >= 80 ? "prog" : "low"); }
+function renderDash(){
+  var st = computeStats();
+  var risks = [];
+  if(st.expiredCerts.length) risks.push(st.expiredCerts.length + " expired certification" + (st.expiredCerts.length === 1 ? "" : "s") + " on the crew — " + st.expiredCerts.map(function(x){ return x.worker.name + "'s " + x.cert.name; }).join("; ") + ". OSHA's forklift rule requires an operator evaluation at least once every 3 years (1910.178(l)) — an expired evaluation means that operator should not be on the truck until re-evaluated.");
+  if(st.topicsMissing.length) risks.push(st.topicsMissing.length + " audit-required talk topic" + (st.topicsMissing.length === 1 ? " has" : "s have") + " no talk on file: " + st.topicsMissing.join(", ") + ".");
+  if(st.auditDays !== null && st.auditDays < 0) risks.push("The audit date in Settings (" + fmtD(state.settings.auditDate) + ") has passed — update it so the countdown is honest.");
+  $("dashBanner").innerHTML = risks.length ? '<div class="risk"><b>Before the auditor finds it:</b><ul style="margin:6px 0 0 18px">' + risks.map(function(r){ return "<li>" + esc(r) + "</li>"; }).join("") + "</ul></div>" : "";
+  var auditTxt = st.auditDays === null ? "No date set" : (st.auditDays > 0 ? st.auditDays + " days away" : (st.auditDays === 0 ? "Today" : "Date passed"));
+  $("dashCards").innerHTML =
+    '<div class="stat"><span class="k">Binder completeness</span><span class="v">' + st.overall + '%</span><span class="sub">Across the 6 audit categories</span></div>' +
+    '<div class="stat"><span class="k">GC audit — ' + esc(state.settings.gc || "not set") + '</span><span class="v" style="font-size:1.35rem">' + esc(auditTxt) + '</span><span class="sub">' + (state.settings.auditDate ? fmtD(state.settings.auditDate) + " · " + esc(state.settings.project) : "Set the date in Help &gt; Settings") + '</span></div>' +
+    '<div class="stat"><span class="k">Talks on file</span><span class="v">' + state.talks.length + '</span><span class="sub">' + st.topicsDone + " of " + REQUIRED_TOPICS.length + ' audit-required topics covered</span></div>' +
+    '<div class="stat"><span class="k">Open chase items</span><span class="v">' + chaseItems(st).length + '</span><span class="sub">Listed below, by name</span></div>' +
+    '<div class="stat"><span class="k">Certifications expired</span><span class="v">' + st.expiredCerts.length + '</span><span class="sub">' + st.expiringCerts.length + ' more expire within 30 days</span></div>' +
+    '<div class="stat"><span class="k">Recordable cases, 2026</span><span class="v">' + st.sum300a.total + '</span><span class="sub">On the 300 log — figured from incident reports</span></div>';
+  $("dashCatBody").innerHTML = st.cats.map(function(c){
+    return "<tr><td><b>" + esc(c.label) + "</b></td><td>" + esc(c.ask) + "</td><td class=\"num\">" + c.done + " of " + c.total + "</td>" +
+      '<td><div class="bar"><span class="' + pctClass(c.pct) + '" style="width:' + c.pct + '%"></span></div><span class="pctlabel">' + c.pct + "%</span></td></tr>";
+  }).join("");
+  var items = chaseItems(st);
+  $("dashChaseBody").innerHTML = items.length ? items.map(function(it){ return "<tr><td><b>" + esc(it.kind) + "</b></td><td>" + esc(it.detail) + "</td></tr>"; }).join("") : '<tr><td colspan="2">Nothing to chase — every requirement on file is current.</td></tr>';
+}
+function renderTalks(){
+  $("topicLib").innerHTML = TOPIC_LIBRARY.map(function(t){
+    var covered = computeStats().topicsCovered[t];
+    return '<button type="button" class="topic" data-topic="' + esc(t) + '">' + esc(t) + (covered ? " ✓" : "") + "</button>";
+  }).join("");
+  var lib = $("topicLib").querySelectorAll("button");
+  for(var i=0;i<lib.length;i++) lib[i].addEventListener("click", function(){ $("t_topic").value = this.getAttribute("data-topic"); });
+  var rows = state.talks.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  $("talkBody").innerHTML = rows.length ? rows.map(function(t){
+    var signed = t.attendees.filter(function(w){ return t.signatures[w]; }).length;
+    return "<tr><td style=\"white-space:nowrap\">" + fmtD(t.date) + "</td><td><b>" + esc(t.topic) + "</b></td><td>" + esc(t.project) + "</td><td>" + esc(t.ledBy) + "</td><td class=\"num\">" + t.attendees.length + "</td><td class=\"num\">" + signed + (signed < t.attendees.length ? ' <span class="badge soon">unsigned</span>' : "") + '</td><td><button type="button" class="btn plain signsBtn" data-talk="' + esc(t.id) + '">Sign-offs</button></td></tr>';
+  }).join("") : '<tr><td colspan="7">No talks recorded yet.</td></tr>';
+  var btns = $("talkBody").querySelectorAll(".signsBtn");
+  for(var k=0;k<btns.length;k++) btns[k].addEventListener("click", function(){ openSignModal(this.getAttribute("data-talk")); });
+}
+function renderJsas(){
+  var rows = state.jsas.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  $("jsaBody").innerHTML = rows.length ? rows.map(function(j){
+    return "<tr><td style=\"white-space:nowrap\">" + fmtD(j.date) + "</td><td><b>" + esc(j.jobTask) + "</b></td><td>" + esc(j.project) + "</td><td>" + esc(j.preparedBy) + "</td><td class=\"num\">" + j.crew.length + "</td></tr>";
+  }).join("") : '<tr><td colspan="5">No JSAs on file yet.</td></tr>';
+}
+function renderInsp(){
+  var rows = state.inspections.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  $("inspBody").innerHTML = rows.length ? rows.map(function(x){
+    return "<tr><td style=\"white-space:nowrap\">" + fmtD(x.date) + "</td><td><b>" + esc(x.equipment) + "</b></td><td>" + esc(x.equipId) + "</td><td>" + esc(x.inspector) + "</td><td>" + (x.result === "Pass" ? '<span class="badge ok">Pass</span>' : '<span class="badge bad">Defects found</span>') + "</td><td>" + esc(x.defects) + "</td></tr>";
+  }).join("") : '<tr><td colspan="6">No inspections on file yet.</td></tr>';
+}
+function renderTrain(){
+  var st = computeStats(), today = st.today;
+  $("matrixBody").innerHTML = REQUIRED_CERTS.map(function(req){
+    var need = needsFor(req), cur = 0, exp = 0, expired = 0, missing = 0;
+    need.forEach(function(w){
+      var c = certFor(w.id, req.name);
+      if(!c){ missing++; return; }
+      var s = certStatus(c, today);
+      if(s === "expired") expired++; else if(s === "expiring"){ exp++; cur++; } else cur++;
+    });
+    return "<tr><td><b>" + esc(req.name) + "</b></td><td>" + (req.needs === "ALL" ? "All workers (" + need.length + ")" : need.length + " workers") + "</td><td class=\"num\">" + cur + "</td><td class=\"num\">" + exp + "</td><td class=\"num\">" + expired + "</td><td class=\"num\">" + missing + "</td></tr>";
+  }).join("");
+  $("c_worker").innerHTML = state.workers.map(function(w){ return '<option value="' + esc(w.id) + '">' + esc(w.name) + " — " + esc(w.role) + "</option>"; }).join("");
+}
+function renderOsha(){
+  var rows = state.incidents.slice().sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  $("incBody").innerHTML = rows.length ? rows.map(function(n){
+    return "<tr><td style=\"white-space:nowrap\">" + fmtD(n.date) + "</td><td><b>" + esc(n.workerName) + "</b></td><td>" + esc(n.description) + "</td><td>" + esc(n.classification) + "</td><td>" + (n.recordable ? '<span class="badge ok">On the log</span>' : '<span class="badge soon">Not recorded</span>') + "</td></tr>";
+  }).join("") : '<tr><td colspan="5">No incidents reported.</td></tr>';
+  var rec = state.incidents.filter(function(n){ return n.recordable; }).sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  $("logBody").innerHTML = rec.length ? rec.map(function(n){
+    return "<tr><td style=\"white-space:nowrap\">" + fmtD(n.date) + "</td><td><b>" + esc(n.workerName) + "</b></td><td>" + esc(n.jobTitle) + "</td><td>" + esc(n.location) + "</td><td>" + esc(n.classification) + "</td><td class=\"num\">" + n.daysAway + "</td><td class=\"num\">" + n.daysRestricted + "</td><td>" + esc(n.type) + "</td></tr>";
+  }).join("") : '<tr><td colspan="8">No recordable cases.</td></tr>';
+  var s = computeStats().sum300a;
+  $("sumBox").innerHTML = "<b>Total recordable cases: " + s.total + "</b> · Deaths: " + s.death + " · Cases with days away: " + s.awayCases + " (" + s.awayDays + " days) · Cases with job transfer or restriction: " + s.restrCases + " (" + s.restrDays + " days restricted) · Other recordable cases: " + s.other + " · Injuries: " + s.injuries + " · Illnesses: " + s.illnesses + ". Figured from the log above — if a total looks wrong, the incident report behind it is where to look. Case counts follow what each case actually involved: a case with both days away and restricted days counts in both, so the case counts can add up to more than the total. The day figures are straight column totals, the way the 300A adds them.";
+}
+function renderWorkers(){
+  var today = todayStr();
+  $("walletGrid").innerHTML = state.workers.map(function(w){
+    var mine = state.certs.filter(function(c){ return c.workerId === w.id; });
+    var lines = mine.length ? mine.map(function(c){
+      var s = certStatus(c, today);
+      var badge = s === "expired" ? ' <span class="badge bad">Expired ' + fmtD(c.expires) + "</span>" : (s === "expiring" ? ' <span class="badge soon">Expires ' + fmtD(c.expires) + "</span>" : (c.expires ? ' <span class="badge ok">to ' + fmtD(c.expires) + "</span>" : ' <span class="badge ok">No expiry</span>'));
+      return '<div class="certline"><span>' + esc(c.name) + badge + '<br><span style="color:var(--muted);font-size:.82rem">' + esc(c.issuer) + (c.number ? " · #" + esc(c.number) : "") + "</span></span></div>";
+    }).join("") : '<p class="pdesc">No certifications on file.</p>';
+    return '<div class="wallet"><h4>' + esc(w.name) + '</h4><div class="role">' + esc(w.role) + "</div>" + lines + "</div>";
+  }).join("");
+}
+function renderBinder(){
+  var projects = [];
+  state.talks.forEach(function(t){ if(t.project && projects.indexOf(t.project) === -1) projects.push(t.project); });
+  state.jsas.forEach(function(j){ if(j.project && projects.indexOf(j.project) === -1) projects.push(j.project); });
+  if(state.settings.project && projects.indexOf(state.settings.project) === -1) projects.unshift(state.settings.project);
+  var cur = $("b_project").value;
+  $("b_project").innerHTML = projects.map(function(p){ return '<option value="' + esc(p) + '">' + esc(p) + "</option>"; }).join("");
+  if(cur && projects.indexOf(cur) !== -1) $("b_project").value = cur;
+  var st = computeStats();
+  $("binderChecklist").innerHTML = st.cats.map(function(c){
+    return '<div class="checkrow"><span>' + (c.pct >= 100 ? "✅" : "⚠️") + " <b>" + esc(c.label) + "</b> — " + c.done + " of " + c.total + "</span><span>" + c.pct + "%</span></div>";
+  }).join("") + '<p class="pdesc" style="margin-top:10px">Overall binder completeness: <b>' + st.overall + "%</b>. Missing items are listed on the binder's cover sheet, not hidden.</p>";
+}
+function fillCheckboxes(){
+  var html = state.workers.map(function(w){ return '<label><input type="checkbox" value="' + esc(w.id) + '"> ' + esc(w.name) + "</label>"; }).join("");
+  $("t_attendees").innerHTML = html;
+  $("j_crew").innerHTML = html;
+}
+function renderSettings(){
+  $("cbCompany").textContent = state.settings.company;
+  $("cbAudit").textContent = "GC audit: " + (state.settings.gc || "—") + (state.settings.project ? " · " + state.settings.project : "") + (state.settings.auditDate ? " · " + fmtD(state.settings.auditDate) : "");
+  $("s_company").value = state.settings.company;
+  $("s_gc").value = state.settings.gc;
+  $("s_project").value = state.settings.project;
+  $("s_auditDate").value = state.settings.auditDate;
+}
+function renderAll(){
+  renderSettings(); renderDash(); renderTalks(); renderJsas(); renderInsp(); renderTrain(); renderOsha(); renderWorkers(); renderBinder();
+}
+
+var signTalkId = null;
+function openSignModal(talkId){
+  var t = null;
+  state.talks.forEach(function(x){ if(x.id === talkId) t = x; });
+  if(!t) return;
+  signTalkId = talkId;
+  $("signTitle").textContent = "Sign-offs — " + t.topic + " (" + fmtD(t.date) + ")";
+  $("signList").innerHTML = t.attendees.map(function(wid){
+    var signed = !!t.signatures[wid];
+    return '<div class="sigrow"><div class="sighead"><b>' + esc(workerName(wid)) + '</b><span class="sigstatus" data-w="' + esc(wid) + '">' + (signed ? "✓ Signed" : "Not signed") + '</span></div>' +
+      (signed ? '<p class="pdesc" style="margin:4px 0 0">Signature on file with this talk.</p>' :
+      '<canvas class="sigpad" data-w="' + esc(wid) + '" width="520" height="110"></canvas><div style="margin-top:6px"><button type="button" class="btn plain sigSave" data-w="' + esc(wid) + '">Save signature</button> <button type="button" class="btn plain sigClear" data-w="' + esc(wid) + '">Clear</button></div>') + "</div>";
+  }).join("");
+  var pads = $("signList").querySelectorAll("canvas.sigpad");
+  for(var i=0;i<pads.length;i++) wirePad(pads[i]);
+  var saves = $("signList").querySelectorAll(".sigSave");
+  for(var j=0;j<saves.length;j++) saves[j].addEventListener("click", function(){ saveSignature(this.getAttribute("data-w")); });
+  var clears = $("signList").querySelectorAll(".sigClear");
+  for(var k=0;k<clears.length;k++) clears[k].addEventListener("click", function(){
+    var c = $("signList").querySelector('canvas[data-w="' + this.getAttribute("data-w") + '"]');
+    if(c){ var ctx = c.getContext("2d"); ctx.clearRect(0, 0, c.width, c.height); c._drawn = false; }
+  });
+  $("signModal").style.display = "flex";
+}
+function wirePad(c){
+  var ctx = c.getContext("2d"); ctx.lineWidth = 2.4; ctx.lineCap = "round"; ctx.strokeStyle = "#14213d";
+  var drawing = false, last = null;
+  function pos(e){ var r = c.getBoundingClientRect(); var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left; var y = (e.touches ? e.touches[0].clientY : e.clientY) - r.top; return { x: x * c.width / r.width, y: y * c.height / r.height }; }
+  function start(e){ drawing = true; last = pos(e); e.preventDefault(); }
+  function move(e){ if(!drawing) return; var p = pos(e); ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p; c._drawn = true; e.preventDefault(); }
+  function end(){ drawing = false; }
+  c.addEventListener("mousedown", start); c.addEventListener("mousemove", move); c.addEventListener("mouseup", end); c.addEventListener("mouseleave", end);
+  c.addEventListener("touchstart", start, {passive:false}); c.addEventListener("touchmove", move, {passive:false}); c.addEventListener("touchend", end);
+}
+function saveSignature(wid){
+  var t = null;
+  state.talks.forEach(function(x){ if(x.id === signTalkId) t = x; });
+  if(!t) return;
+  var c = $("signList").querySelector('canvas[data-w="' + wid + '"]');
+  if(!c || !c._drawn){ toast("Draw the signature first, then save it."); return; }
+  t.signatures[wid] = c.toDataURL("image/png");
+  save(); openSignModal(signTalkId); renderAll();
+  toast(workerName(wid) + " signed.");
+}
+function checkedIds(containerId){
+  var out = [], boxes = $(containerId).querySelectorAll('input[type="checkbox"]:checked');
+  for(var i=0;i<boxes.length;i++) out.push(boxes[i].value);
+  return out;
+}
+function clearChecks(containerId){
+  var boxes = $(containerId).querySelectorAll('input[type="checkbox"]');
+  for(var i=0;i<boxes.length;i++) boxes[i].checked = false;
+}
+function saveTalk(){
+  var topic = trimStr($("t_topic").value), date = $("t_date").value;
+  var attendees = checkedIds("t_attendees");
+  var payload = { topic:topic, date:date, project:trimStr($("t_project").value), location:trimStr($("t_location").value), ledBy:trimStr($("t_ledBy").value), notes:trimStr($("t_notes").value), attendees:attendees.slice().sort() };
+  if(!guard("talk", payload)) return;
+  if(!topic){ toast("Give the talk a topic first."); return; }
+  if(!isValidDateString(date)){ toast("Pick the date of the talk."); return; }
+  if(!attendees.length){ toast("Tick at least one attendee — a talk nobody attended is not a talk."); return; }
+  var talk = { id:uid("t"), date:date, topic:clampStr(topic, 100), project:clampStr(payload.project, 120), location:clampStr(payload.location, 120), ledBy:clampStr(payload.ledBy, 80), notes:clampStr(payload.notes, 2000), attendees:attendees, signatures:{} };
+  state.talks.push(talk); save();
+  $("t_topic").value = ""; $("t_notes").value = ""; $("t_location").value = ""; clearChecks("t_attendees");
+  renderAll(); toast("Talk saved — collect the crew's sign-offs now.");
+  openSignModal(talk.id);
+}
+function saveJsa(){
+  var task = trimStr($("j_task").value), date = $("j_date").value;
+  var crew = checkedIds("j_crew");
+  var payload = { task:task, date:date, project:trimStr($("j_project").value), by:trimStr($("j_by").value), hazards:trimStr($("j_hazards").value), controls:trimStr($("j_controls").value), ppe:trimStr($("j_ppe").value), crew:crew.slice().sort() };
+  if(!guard("jsa", payload)) return;
+  if(!task){ toast("Name the job or task first."); return; }
+  if(!isValidDateString(date)){ toast("Pick the JSA date."); return; }
+  state.jsas.push({ id:uid("j"), date:date, jobTask:clampStr(task, 160), project:clampStr(payload.project, 120), preparedBy:clampStr(payload.by, 80), hazards:clampStr(payload.hazards, 2000), controls:clampStr(payload.controls, 2000), ppe:clampStr(payload.ppe, 300), crew:crew });
+  save();
+  $("j_task").value = ""; $("j_hazards").value = ""; $("j_controls").value = ""; $("j_ppe").value = ""; clearChecks("j_crew");
+  renderAll(); toast("JSA saved to the binder.");
+}
+function saveInsp(){
+  var equip = trimStr($("i_equip").value), date = $("i_date").value;
+  var payload = { equip:equip, equipId:trimStr($("i_equipId").value), date:date, by:trimStr($("i_by").value), result:$("i_result").value, defects:trimStr($("i_defects").value) };
+  if(!guard("insp", payload)) return;
+  if(!equip){ toast("Name the equipment first."); return; }
+  if(!isValidDateString(date)){ toast("Pick the inspection date."); return; }
+  state.inspections.push({ id:uid("i"), date:date, equipment:clampStr(equip, 120), equipId:clampStr(payload.equipId, 40), inspector:clampStr(payload.by, 80), result:payload.result, defects:clampStr(payload.defects, 1000) });
+  save();
+  $("i_equip").value = ""; $("i_equipId").value = ""; $("i_defects").value = "";
+  renderAll(); toast("Inspection saved.");
+}
+function saveCert(){
+  var wid = $("c_worker").value, name = trimStr($("c_name").value);
+  var payload = { wid:wid, name:name, issuer:trimStr($("c_issuer").value), number:trimStr($("c_number").value), issued:$("c_issued").value, expires:$("c_expires").value };
+  if(!guard("cert", payload)) return;
+  if(!workerById(wid)){ toast("Pick the worker first."); return; }
+  if(!name){ toast("Name the certification."); return; }
+  if(payload.issued && !isValidDateString(payload.issued)){ toast("The issued date does not look right."); return; }
+  if(payload.expires && !isValidDateString(payload.expires)){ toast("The expiry date does not look right."); return; }
+  state.certs.push({ id:uid("c"), workerId:wid, name:clampStr(name, 80), issuer:clampStr(payload.issuer, 100), number:clampStr(payload.number, 60), issued:payload.issued, expires:payload.expires });
+  save();
+  $("c_name").value = ""; $("c_issuer").value = ""; $("c_number").value = ""; $("c_issued").value = ""; $("c_expires").value = "";
+  renderAll(); toast("Certification saved — matrix and chase list updated.");
+}
+function updateGuidance(){
+  var crit = document.querySelectorAll(".o-crit"), any = false;
+  for(var i=0;i<crit.length;i++) if(crit[i].checked) any = true;
+  var cls = $("o_class").value;
+  var g = $("o_guidance");
+  if(any){
+    g.innerHTML = "<b>Guidance (29 CFR 1904.7):</b> at least one box is ticked, so this case appears to meet a recording criterion and belongs on the 300 log" + (cls === "First aid only" ? " — but the classification below says first aid only. If treatment truly stayed within the first-aid list at 1904.7(b)(5), untick the boxes; otherwise change the classification. The owner makes the final call." : ". Choose the classification that matches the most severe outcome. The owner makes the final call.");
+  } else if(cls && cls !== "First aid only"){
+    g.innerHTML = "<b>Guidance (29 CFR 1904.7):</b> no recording criterion is ticked, yet the classification puts this case on the log. If days were missed, work was restricted, or treatment went beyond the first-aid list at 1904.7(b)(5), tick what happened; if none did, the case is usually first aid only and stays off the log. The owner makes the final call.";
+  } else if(cls === "First aid only"){
+    g.innerHTML = "<b>Guidance (29 CFR 1904.7):</b> first aid only — this case is reported but stays off the 300 log. First aid means only the treatments on the closed list at 1904.7(b)(5). The owner makes the final call.";
+  } else {
+    g.innerHTML = "Guidance: tick what happened and choose a classification — this line will say whether the case appears to meet a 1904.7 recording criterion. The final call is always the owner's.";
+  }
+}
+function saveIncident(){
+  var name = trimStr($("o_worker").value), date = $("o_date").value, cls = $("o_class").value;
+  var payload = { name:name, date:date, cls:cls, job:trimStr($("o_job").value), loc:trimStr($("o_loc").value), type:$("o_type").value, away:$("o_daysAway").value, restr:$("o_daysRestr").value, desc:trimStr($("o_desc").value), treat:trimStr($("o_treat").value) };
+  if(!guard("incident", payload)) return;
+  if(!name){ toast("Name the worker first."); return; }
+  if(!isValidDateString(date)){ toast("Pick the date of the incident."); return; }
+  if(CLASSES.indexOf(cls) === -1){ toast("Choose the case classification — the most severe outcome."); return; }
+  var inc = { id:uid("o"), date:date, workerName:clampStr(name, 80), jobTitle:clampStr(payload.job, 60), location:clampStr(payload.loc, 120), description:clampStr(payload.desc, 1500), treatment:clampStr(payload.treat, 1500), classification:cls, type:(payload.type === "Illness" ? "Illness" : "Injury"), daysAway:asIntIn(payload.away, 0, 180, 0), daysRestricted:asIntIn(payload.restr, 0, 180, 0), recordable:(cls !== "First aid only") };
+  state.incidents.push(inc); save();
+  $("o_worker").value = ""; $("o_job").value = ""; $("o_loc").value = ""; $("o_desc").value = ""; $("o_treat").value = ""; $("o_class").value = ""; $("o_daysAway").value = "0"; $("o_daysRestr").value = "0";
+  var crit = document.querySelectorAll(".o-crit"); for(var i=0;i<crit.length;i++) crit[i].checked = false;
+  updateGuidance(); renderAll();
+  toast(inc.recordable ? "Incident saved — it is on the 300 log." : "Incident saved — first aid only, kept off the log.");
+}
+function saveWorker(){
+  var name = trimStr($("w_name").value), role = trimStr($("w_role").value);
+  var payload = { name:name, role:role };
+  if(!guard("worker", payload)) return;
+  if(!name){ toast("The worker needs a name."); return; }
+  state.workers.push({ id:uid("w"), name:clampStr(name, 80), role:clampStr(role, 60) });
+  save(); fillCheckboxes();
+  $("w_name").value = ""; $("w_role").value = "";
+  renderAll(); toast(name + " added. Their wallet is below — add certifications from Training & Certs.");
+}
+function pilotGate(){
+  var ok = trimStr($("pilotCompany").value) && trimStr($("pilotName").value) && trimStr($("pilotEmail").value).indexOf("@") > 0 && $("pilotAgree").checked;
+  $("pilotSend").disabled = !ok;
+}
+function sendPilot(){
+  var body = {
+    company: trimStr($("pilotCompany").value), name: trimStr($("pilotName").value), email: trimStr($("pilotEmail").value),
+    workers: trimStr($("pilotWorkers").value), note: trimStr($("pilotNote").value)
+  };
+  var payload = { company:body.company, name:body.name, email:body.email, workers:body.workers, note:body.note, agree:$("pilotAgree").checked };
+  if(!guard("pilot", payload)) return;
+  if(!payload.agree){ toast("Please tick the understanding box first."); return; }
+  var lines = [
+    "TalkBinder pilot request — $249 Audit-Binder Build",
+    "",
+    "Company: " + body.company,
+    "Name: " + body.name,
+    "Email: " + body.email,
+    "Workers: " + (body.workers || "not stated"),
+    "Note: " + (body.note || "—"),
+    "",
+    "I understand TalkBinder prepares the binder and keeps the records — my company reviews everything, makes the safety and recordability decisions, and answers for them.",
+    "",
+    "Sent from TalkBinder " + VERSION
+  ];
+  var href = "mailto:whitewolfbackoffice@gmail.com?subject=" + encodeURIComponent("TalkBinder pilot request — $249 Audit-Binder Build") + "&body=" + encodeURIComponent(lines.join("\n"));
+  window.location.href = href;
+  toast("Opening your email app with the pilot request — just press send there.");
+}
+function saveSettings(){
+  var payload = { company:trimStr($("s_company").value), gc:trimStr($("s_gc").value), project:trimStr($("s_project").value), auditDate:$("s_auditDate").value };
+  if(!guard("settings", payload)) return;
+  if(!payload.company){ toast("The company name cannot be blank."); return; }
+  if(payload.auditDate && !isValidDateString(payload.auditDate)){ toast("The audit date does not look right."); return; }
+  state.settings.company = clampStr(payload.company, 120);
+  state.settings.gc = clampStr(payload.gc, 120);
+  state.settings.project = clampStr(payload.project, 120);
+  state.settings.auditDate = payload.auditDate;
+  save(); renderAll(); toast("Settings saved.");
+}
+function exportBackup(){
+  var blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "talkbinder-backup.json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  toast("Backup downloaded — keep it somewhere safe.");
+}
+function importBackup(file){
+  var reader = new FileReader();
+  reader.onload = function(){
+    var clean = null;
+    try{ clean = sanitizeState(JSON.parse(String(reader.result))); }catch(e){ clean = null; }
+    if(!clean || !clean.workers.length){ toast("That file could not be read as a TalkBinder backup — nothing was changed."); return; }
+    state = clean; save(); fillCheckboxes(); renderAll();
+    toast("Backup imported — the binder now shows the imported records.");
+  };
+  reader.onerror = function(){ toast("That file could not be read — nothing was changed."); };
+  reader.readAsText(file);
+}
+function resetDemo(){
+  state = seedState(); save(); fillCheckboxes(); renderAll();
+  toast("Demo data restored.");
+}
+
+function sigCell(v){
+  if(!v) return "— not signed —";
+  if(v.indexOf("data:image/") === 0) return '<img class="sigimg" src="' + v + '" alt="Signature">';
+  return "Signed";
+}
+function produceBinder(){
+  var st = computeStats();
+  var project = $("b_project").value || state.settings.project;
+  var prepared = trimStr($("b_prepared").value) || "—";
+  var inProject = function(p){ return !project || p === project; };
+  var talks = state.talks.filter(function(t){ return inProject(t.project); }).sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  var jsas = state.jsas.filter(function(j){ return inProject(j.project); }).sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  var items = chaseItems(st);
+  var h = "";
+  h += '<div class="pdoc"><h1>Safety Binder — ' + esc(state.settings.company) + "</h1>" +
+    "<p><b>Project:</b> " + esc(project || "All projects") + "<br><b>Prepared for:</b> " + esc(state.settings.gc || "General contractor audit") + "<br><b>Prepared by:</b> " + esc(prepared) + "<br><b>Date produced:</b> " + fmtD(todayStr()) + "<br><b>GC audit date:</b> " + (state.settings.auditDate ? fmtD(state.settings.auditDate) : "Not set") + "</p>" +
+    "<p><b>Binder completeness: " + st.overall + "%</b> across the audit categories below. Everything in this binder is printed from the company's own records as they stand today — nothing added, nothing held back.</p>";
+  if(items.length){
+    h += "<h2>Open items — stated up front</h2><ul>" + items.map(function(it){ return "<li><b>" + esc(it.kind) + ":</b> " + esc(it.detail) + "</li>"; }).join("") + "</ul>";
+  } else {
+    h += "<p>No open items: every requirement on file is current.</p>";
+  }
+  h += "<h2>Completeness by category</h2><table><tr><th>Category</th><th>On file</th><th>Complete</th></tr>" +
+    st.cats.map(function(c){ return "<tr><td>" + esc(c.label) + "</td><td>" + c.done + " of " + c.total + "</td><td>" + c.pct + "%</td></tr>"; }).join("") + "</table>";
+  h += "<h2>Toolbox talks" + (project ? " — " + esc(project) : "") + "</h2>";
+  h += talks.length ? talks.map(function(t){
+    var att = t.attendees.map(function(wid){ return "<tr><td>" + esc(workerName(wid)) + "</td><td>" + sigCell(t.signatures[wid]) + "</td></tr>"; }).join("");
+    return "<h3>" + esc(t.topic) + " — " + fmtD(t.date) + "</h3><p>Led by " + esc(t.ledBy) + (t.location ? " · " + esc(t.location) : "") + "</p><p>" + esc(t.notes) + '</p><table><tr><th>Attendee</th><th>Signature</th></tr>' + att + "</table>";
+  }).join("") : "<p>No talks on file for this project.</p>";
+  h += "<h2>Job safety analyses" + (project ? " — " + esc(project) : "") + "</h2>";
+  h += jsas.length ? jsas.map(function(j){
+    return "<h3>" + esc(j.jobTask) + " — " + fmtD(j.date) + "</h3><p>Prepared by " + esc(j.preparedBy) + " · Crew: " + j.crew.map(workerName).map(esc).join(", ") + "</p><p><b>Hazards:</b> " + esc(j.hazards).replace(/\n/g, "; ") + "</p><p><b>Controls:</b> " + esc(j.controls).replace(/\n/g, "; ") + "</p><p><b>PPE:</b> " + esc(j.ppe) + "</p>";
+  }).join("") : "<p>No JSAs on file for this project.</p>";
+  h += "<h2>Equipment inspections</h2><table><tr><th>Date</th><th>Equipment</th><th>ID</th><th>Inspected by</th><th>Result</th><th>Notes</th></tr>" +
+    state.inspections.slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; }).map(function(x){ return "<tr><td>" + fmtD(x.date) + "</td><td>" + esc(x.equipment) + "</td><td>" + esc(x.equipId) + "</td><td>" + esc(x.inspector) + "</td><td>" + esc(x.result) + "</td><td>" + esc(x.defects) + "</td></tr>"; }).join("") + "</table>";
+  h += "<h2>Training matrix</h2><table><tr><th>Certification</th><th>Required for</th><th>Current</th><th>Expiring ≤30 days</th><th>Expired</th><th>Missing</th></tr>" +
+    REQUIRED_CERTS.map(function(req){
+      var need = needsFor(req), cur = 0, exp = 0, expired = 0, missing = 0;
+      need.forEach(function(w){ var c = certFor(w.id, req.name); if(!c){ missing++; return; } var s = certStatus(c, st.today); if(s === "expired") expired++; else if(s === "expiring"){ exp++; cur++; } else cur++; });
+      return "<tr><td>" + esc(req.name) + "</td><td>" + need.length + "</td><td>" + cur + "</td><td>" + exp + "</td><td>" + expired + "</td><td>" + missing + "</td></tr>";
+    }).join("") + "</table>";
+  if(st.expiredCerts.length) h += "<p><b>Expired:</b> " + st.expiredCerts.map(function(x){ return esc(x.worker.name) + " — " + esc(x.cert.name) + " (expired " + fmtD(x.cert.expires) + ")"; }).join("; ") + ".</p>";
+  if(st.expiringCerts.length) h += "<p><b>Expiring within 30 days:</b> " + st.expiringCerts.map(function(x){ return esc(x.worker.name) + " — " + esc(x.cert.name) + " (" + fmtD(x.cert.expires) + ")"; }).join("; ") + ".</p>";
+  if(st.missingCerts.length) h += "<p><b>Missing:</b> " + st.missingCerts.map(function(x){ return esc(x.worker.name) + " — " + esc(x.certName); }).join("; ") + ".</p>";
+  var rec = state.incidents.filter(function(n){ return n.recordable; }).sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  h += "<h2>OSHA 300 log — recordable cases</h2><table><tr><th>Date</th><th>Worker</th><th>Job title</th><th>Where</th><th>Classification</th><th>Days away</th><th>Days restricted</th><th>Type</th></tr>" +
+    rec.map(function(n){ return "<tr><td>" + fmtD(n.date) + "</td><td>" + esc(n.workerName) + "</td><td>" + esc(n.jobTitle) + "</td><td>" + esc(n.location) + "</td><td>" + esc(n.classification) + "</td><td>" + n.daysAway + "</td><td>" + n.daysRestricted + "</td><td>" + esc(n.type) + "</td></tr>"; }).join("") + "</table>";
+  var s = st.sum300a;
+  h += "<h2>300A annual summary (totals from the log)</h2><p>Total recordable cases: " + s.total + " · Deaths: " + s.death + " · Cases with days away: " + s.awayCases + " (" + s.awayDays + " days) · Cases with job transfer or restriction: " + s.restrCases + " (" + s.restrDays + " days) · Other recordable: " + s.other + " · Injuries: " + s.injuries + " · Illnesses: " + s.illnesses + ".</p>";
+  h += "<p>Prepared with TalkBinder " + VERSION + ". TalkBinder prepares this binder from the company's records; the company reviews it, makes the safety and recordability decisions, and answers for them. Recordability guidance follows 29 CFR 1904.7; the 300A summary is certified by a company executive and posted February 1 – April 30 per 1904.32; records are retained five years per 1904.33.</p></div>";
+  $("printArea").innerHTML = h;
+  setTimeout(function(){ window.print(); }, 60);
+}
+var recog = null, recogTarget = null;
+function speakNum(t){
+  var words = { zero:0, one:1, two:2, three:3, four:4, five:5, six:6, seven:7, eight:8, nine:9, ten:10, eleven:11, twelve:12, thirteen:13, fourteen:14, fifteen:15, sixteen:16, seventeen:17, eighteen:18, nineteen:19, twenty:20, thirty:30, forty:40, fifty:50, sixty:60, seventy:70, eighty:80, ninety:90, hundred:100 };
+  var parts = String(t).toLowerCase().replace(/[^a-z0-9.\s-]/g, " ").split(/\s+/), total = 0, cur = 0, any = false;
+  for(var i=0;i<parts.length;i++){
+    var p = parts[i];
+    if(p === "") continue;
+    if(/^\d+(\.\d+)?$/.test(p)){ cur += parseFloat(p); any = true; }
+    else if(words[p] !== undefined){ if(words[p] === 100){ cur = (cur || 1) * 100; } else cur += words[p]; any = true; }
+    else if(p === "and"){ continue; }
+    else return t;
+  }
+  if(!any) return t;
+  total += cur;
+  return String(Math.round(total * 100) / 100);
+}
+function wireMic(btn){
+  btn.addEventListener("click", function(){
+    var target = $(btn.getAttribute("data-for"));
+    if(!target) return;
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ toast("Voice input isn't available in this browser — typing works everywhere."); return; }
+    if(recog){ try{ recog.stop(); }catch(e){} }
+    recog = new SR(); recog.lang = "en-US"; recog.interimResults = false; recog.maxAlternatives = 1; recogTarget = target;
+    recog.onresult = function(ev){
+      var txt = ev.results[0][0].transcript || "";
+      if(target.type === "number") txt = speakNum(txt);
+      target.value = txt;
+      target.dispatchEvent(new Event("input", {bubbles:true}));
+      target.dispatchEvent(new Event("change", {bubbles:true}));
+    };
+    recog.onerror = function(){ toast("Didn't catch that — typing works too."); };
+    try{ recog.start(); toast("Listening — speak now."); }catch(e){ toast("Voice input couldn't start here — typing works everywhere."); }
+  });
+}
+function init(){
+  load();
+  fillCheckboxes();
+  $("t_date").value = todayStr(); $("j_date").value = todayStr(); $("i_date").value = todayStr(); $("o_date").value = todayStr();
+  if(state.settings.project){ $("t_project").value = state.settings.project; $("j_project").value = state.settings.project; }
+  var navBtns = document.querySelectorAll("#mainNav button");
+  for(var i=0;i<navBtns.length;i++) navBtns[i].addEventListener("click", function(){ showPanel(this.getAttribute("data-view")); });
+  if(recoveredNote){
+    var rb = $("recoverBanner");
+    rb.innerHTML = '<span>' + (recoveredNote === "backup"
+      ? "Your saved records could not be read, so TalkBinder loaded your last good backup. The unreadable copy was kept aside — nothing was overwritten."
+      : "Your saved records could not be read and no readable backup was found, so the demo records were reloaded. The unreadable copy was kept aside.") +
+      '</span> <span style="display:inline-flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn plain" id="recoverRestore">Restore last good backup</button><button type="button" class="btn plain" id="recoverDismiss">Continue with what is shown</button></span>';
+    rb.style.display = "block";
+    $("recoverRestore").addEventListener("click", function(){
+      var bak = null;
+      try{ bak = localStorage.getItem(BKEY); }catch(e){}
+      var clean = null;
+      if(bak){ try{ clean = sanitizeState(JSON.parse(bak)); }catch(e2){ clean = null; } }
+      if(clean){ state = clean; recoveredNote = ""; save(); fillCheckboxes(); $("recoverBanner").style.display = "none"; renderAll(); toast("Restored your last good records."); }
+      else { state = seedState(); recoveredNote = ""; save(); fillCheckboxes(); $("recoverBanner").style.display = "none"; renderAll(); toast("No readable backup was found — the demo records were reloaded."); }
+    });
+    $("recoverDismiss").addEventListener("click", function(){ $("recoverBanner").style.display = "none"; });
+  }
+  $("t_save").addEventListener("click", saveTalk);
+  $("j_save").addEventListener("click", saveJsa);
+  $("i_save").addEventListener("click", saveInsp);
+  $("c_save").addEventListener("click", saveCert);
+  $("o_save").addEventListener("click", saveIncident);
+  $("w_save").addEventListener("click", saveWorker);
+  $("s_save").addEventListener("click", saveSettings);
+  $("b_produce").addEventListener("click", produceBinder);
+  $("signDone").addEventListener("click", function(){ $("signModal").style.display = "none"; renderAll(); });
+  var crit = document.querySelectorAll(".o-crit");
+  for(var c=0;c<crit.length;c++) crit[c].addEventListener("change", updateGuidance);
+  $("o_class").addEventListener("change", updateGuidance);
+  ["pilotCompany","pilotName","pilotEmail","pilotAgree"].forEach(function(id){
+    $(id).addEventListener("input", pilotGate); $(id).addEventListener("change", pilotGate);
+  });
+  $("pilotSend").addEventListener("click", sendPilot);
+  $("d_export").addEventListener("click", exportBackup);
+  $("d_importBtn").addEventListener("click", function(){ $("d_import").click(); });
+  $("d_import").addEventListener("change", function(){ if(this.files && this.files[0]) importBackup(this.files[0]); this.value = ""; });
+  $("d_reset").addEventListener("click", resetDemo);
+  var mics = document.querySelectorAll(".mic");
+  for(var m=0;m<mics.length;m++) wireMic(mics[m]);
+  pilotGate();
+  renderAll();
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
