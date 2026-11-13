@@ -134,10 +134,46 @@
   .sigpad{width:100%; max-width:520px; height:110px; background:#fff; border:1.5px dashed #9aa5b1; border-radius:8px; touch-action:none; margin-top:8px;}
   td.num, th.num{text-align:right;}
   #printArea .pdoc h1{font-size:20px;}
+  /* ===== TalkBinder v0.1.1-demo: modern app-look redesign (BirdTally pattern, charcoal/brass palette) ===== */
+  :root{--bar-h:64px;--shadow:0 2px 6px rgba(35,39,46,.07),0 10px 26px rgba(35,39,46,.10);}
+  body{padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 16px);}
+  header{position:sticky;top:0;z-index:40;background:linear-gradient(135deg,#262b31,#39404a 58%,#33526e);box-shadow:0 2px 12px rgba(35,39,46,.35);}
+  header .mark{flex:0 0 auto;width:50px;height:50px;border-radius:15px;background:linear-gradient(145deg,#d9ba6a,#8a6d2f);display:flex;align-items:center;justify-content:center;font-size:27px;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 3px 8px rgba(0,0,0,.25);}
+  /* Bottom tab bar. Nav buttons are static markup, so each carries real
+     icon/label spans; visible labels are shortened ("Home", "Talks",
+     "Inspect", "Certs", "OSHA", "Produce") so 9 tabs fit at 390px, and
+     each button's aria-label keeps the full original name. (The first
+     tab's full name is "Binder" and the eighth's is "Produce Binder" —
+     the visible labels "Home" / "Produce" keep the two distinct.) The
+     bar's background is non-interactive chrome: like the toast, it must
+     never swallow a tap meant for content beneath it, so only the tab
+     buttons themselves take pointer events (batch-9 PumpLedger lesson). */
+  nav{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:60;background:rgba(255,255,255,.97);border-top:1px solid var(--line);border-bottom:none;box-shadow:0 -3px 16px rgba(35,39,46,.14);padding:6px 8px calc(6px + env(safe-area-inset-bottom));flex-wrap:nowrap;justify-content:center;pointer-events:none;}
+  nav button{flex:1 1 0;min-width:0;max-width:110px;min-height:56px;background:none;border-bottom:none;color:var(--mut);border-radius:14px;padding:4px 1px 5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-weight:700;pointer-events:auto;}
+  nav button .ic{font-size:18px;line-height:1.15;padding:3px 10px;border-radius:999px;transition:background .15s;pointer-events:none;}
+  nav button .lb{font-size:10px;letter-spacing:.1px;white-space:nowrap;pointer-events:none;}
+  nav button.active{color:var(--ink);border-bottom:none;}
+  nav button.active .ic{background:var(--accent);box-shadow:0 2px 6px rgba(90,110,87,.45);}
+  section.panel.active{animation:tbTabIn .28s ease both;}
+  @keyframes tbTabIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card,.formbox,.tblwrap,.riskbanner,.okbanner,.notebox,.wallet,details.helpitem,.stat,.sigrow,.modal{border-radius:16px;box-shadow:var(--shadow);}
+  .btn{border-radius:999px;}
+  input[type=text], input[type=number], input[type=date], input[type=email], select, textarea{border-radius:12px;}
+  .mic{border-radius:50%;}
+  #toast{bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 14px);border-radius:999px;z-index:70;pointer-events:none;}
+  /* No terms gate exists in this demo (verified — the only checkbox gate
+     is the pre-existing pilot-understanding checkbox in the pilot form,
+     untouched), so there is no welcome screen to restyle and no
+     re-prompt risk. */
+  /* scroll-into-view must never park a control under the fixed bar or
+     the sticky header (batch-8 lesson) */
+  button,input,select,textarea,a.btn,summary{scroll-margin-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom) + 32px);scroll-margin-top:96px;}
+  @media print{body{padding-bottom:0;}}
 </style>
 </head>
 <body>
 <header>
+  <div class="mark" aria-hidden="true">🦺</div>
   <div class="logo">Talk<span>Binder</span></div>
   <div class="sub">The audit-ready safety paperwork binder for small contractors — talks, JSAs, inspections, certs, and the OSHA 300 log in one place.</div>
   <div class="demo-badge">Demo</div>
@@ -148,15 +184,15 @@
   <span>Demo data — every company, person, and record in this demo is fictional.</span>
 </div>
 <nav id="mainNav">
-  <button type="button" data-view="dash" class="active">Binder</button>
-  <button type="button" data-view="talks">Toolbox Talks</button>
-  <button type="button" data-view="jsas">JSAs</button>
-  <button type="button" data-view="insp">Inspections</button>
-  <button type="button" data-view="train">Training &amp; Certs</button>
-  <button type="button" data-view="osha">OSHA 300</button>
-  <button type="button" data-view="workers">Workers</button>
-  <button type="button" data-view="binder">Produce Binder</button>
-  <button type="button" data-view="help">Help</button>
+  <button type="button" data-view="dash" class="active" aria-label="Binder"><span class="ic" aria-hidden="true">🏠</span><span class="lb">Home</span></button>
+  <button type="button" data-view="talks" aria-label="Toolbox Talks"><span class="ic" aria-hidden="true">🧰</span><span class="lb">Talks</span></button>
+  <button type="button" data-view="jsas" aria-label="JSAs"><span class="ic" aria-hidden="true">📋</span><span class="lb">JSAs</span></button>
+  <button type="button" data-view="insp" aria-label="Inspections"><span class="ic" aria-hidden="true">🔍</span><span class="lb">Inspect</span></button>
+  <button type="button" data-view="train" aria-label="Training &amp; Certs"><span class="ic" aria-hidden="true">🎓</span><span class="lb">Certs</span></button>
+  <button type="button" data-view="osha" aria-label="OSHA 300"><span class="ic" aria-hidden="true">⚠️</span><span class="lb">OSHA</span></button>
+  <button type="button" data-view="workers" aria-label="Workers"><span class="ic" aria-hidden="true">👷</span><span class="lb">Workers</span></button>
+  <button type="button" data-view="binder" aria-label="Produce Binder"><span class="ic" aria-hidden="true">🖨️</span><span class="lb">Produce</span></button>
+  <button type="button" data-view="help" aria-label="Help"><span class="ic" aria-hidden="true">❓</span><span class="lb">Help</span></button>
 </nav>
 <main>
 <div id="recoverBanner" class="riskbanner" style="display:none"></div>
@@ -366,7 +402,7 @@
   <details class="helpitem"><summary>What counts for the OSHA 300 log?</summary><p>The criteria in 29 CFR 1904.7, listed on the OSHA 300 screen: death, days away, restricted work or transfer, medical treatment beyond first aid, loss of consciousness, or a significant injury or illness diagnosed by a physician or other licensed health care professional. TalkBinder shows guidance from the regulation text; the final decision on every case belongs to the owner.</p></details>
   <details class="helpitem"><summary>What does TalkBinder not do?</summary><p>TalkBinder prepares paperwork. It does not decide whether an injury is recordable, does not certify that your company is compliant, does not file anything with OSHA or anyone else, and does not replace your safety program, your competent persons, or your own judgment. Certifications and evaluations are performed by qualified people in the real world — TalkBinder keeps the records of them.</p></details>
   <details class="helpitem"><summary>Where does my data live, and how do I back it up?</summary><p>On this device, in this browser's storage — nothing is uploaded. Back up from Settings below (Export backup saves a file of every record); import that file on any device to move or restore the binder. Export before you replace a phone or clear browser data.</p></details>
-  <p style="margin:14px 0"><a class="btn" id="emailUs" href="mailto:whitewolfbackoffice@gmail.com?subject=TalkBinder%20help%20%E2%80%94%20v0.1.0-demo&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A%0A%0A">Email us</a></p>
+  <p style="margin:14px 0"><a class="btn" id="emailUs" href="mailto:whitewolfbackoffice@gmail.com?subject=TalkBinder%20help%20%E2%80%94%20v0.1.1-demo&amp;body=Tell%20us%20what%20you%20were%20trying%20to%20do%20and%20what%20happened%3A%0A%0A">Email us</a></p>
   <div class="formbox">
     <h3 style="margin-top:0">Pilot — the $249 audit-binder build</h3>
     <p class="pdesc">We digitize your current safety paperwork — the glovebox forms, the foreman's text-thread photos, the training spreadsheet — and hand back a passing-ready binder for one real GC audit, in TalkBinder, with your crew's records in it. After that, TalkBinder is <b>$149/month flat — every worker, unlimited</b>. No per-seat charges: the per-user trap (at $24–$49 per user per month, putting 40 field workers on a typical platform runs $960–$1,960 a month) is exactly what this replaces.</p>
@@ -410,12 +446,12 @@
 
 <div id="toast" role="status"></div>
 <div id="printArea"></div>
-<footer>TalkBinder v0.1.0-demo · Demo — every company, person, and record shown is fictional · Records live on this device only · TalkBinder prepares the binder; your company reviews it, makes the safety decisions, and answers for them · Seller: White Wolf Apps · Support: whitewolfbackoffice@gmail.com</footer>
+<footer>TalkBinder v0.1.1-demo · Demo — every company, person, and record shown is fictional · Records live on this device only · TalkBinder prepares the binder; your company reviews it, makes the safety decisions, and answers for them · Seller: White Wolf Apps · Support: whitewolfbackoffice@gmail.com</footer>
 
 <script>
 "use strict";
 var KEY = "talkbinder_demo_v1", BKEY = KEY + "_backup", CKEY = KEY + "_corrupt";
-var VERSION = "v0.1.0-demo";
+var VERSION = "v0.1.1-demo";
 var state = null, recoveredNote = "";
 var guardMap = {};
 var TOPIC_LIBRARY = ["Fall Protection","Lockout/Tagout","Scaffold Safety","Silica Dust","Electrical Safety","Trenching & Excavation","Forklift & Pedestrian Safety","Hot Work & Fire Watch","Housekeeping & Slip Hazards","PPE — Eye & Hand Protection","Cold Stress & Winter Weather","Ladder Safety","Crane & Rigging Awareness","Heat Illness Prevention","Confined Space Awareness","Hand & Power Tool Safety"];
